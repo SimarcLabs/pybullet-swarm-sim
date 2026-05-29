@@ -72,19 +72,19 @@ Every example works out of the box — no config files, no setup scripts.
 ### 🔹 Formation Flight (V-shape, 8 drones)
 
 ```bash
-python -m swarm_sim.examples.formation_flight --n-drones 8 --formation v --gui
+python -m swarm_sim.examples.formation_flight --n-drones 8 --formation v
 ```
 
 ### 🔹 Boids Flocking (12 drones)
 
 ```bash
-python -m swarm_sim.examples.flocking --n-drones 12 --gui
+python -m swarm_sim.examples.flocking --n-drones 12
 ```
 
 ### 🔹 Hover Swarm (sanity check)
 
 ```bash
-python -m swarm_sim.examples.hover_swarm --n-drones 4 --gui
+python -m swarm_sim.examples.hover_swarm --n-drones 4
 ```
 
 ### 🔹 RL Training (PPO hover)
@@ -92,7 +92,7 @@ python -m swarm_sim.examples.hover_swarm --n-drones 4 --gui
 ```bash
 pip install pybullet-swarm-sim[rl]
 python -m swarm_sim.examples.rl_hover --train --timesteps 100000
-python -m swarm_sim.examples.rl_hover --play --model-path ppo_hover --gui
+python -m swarm_sim.examples.rl_hover --play --model-path ppo_hover
 ```
 
 ---

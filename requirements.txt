@@ -1,0 +1,11 @@
+# Core dependencies
+pybullet>=3.2.5
+numpy>=1.24.0
+gymnasium>=0.29.0
+matplotlib>=3.7.0
+Pillow>=10.0.0
+scipy>=1.10.0
+
+# Optional: RL training (install with: pip install pybullet-swarm-sim[rl])
+# stable-baselines3>=2.1.0
+# torch>=2.0.0

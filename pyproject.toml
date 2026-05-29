@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pybullet-swarm-sim"
+version = "0.1.0"
+description = "Simulate drone swarms in PyBullet — ready to fly in 5 minutes."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "PyBullet Swarm Sim Contributors"},
+]
+keywords = ["drone", "swarm", "pybullet", "simulation", "robotics", "multi-agent"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = [
+    "pybullet>=3.2.5",
+    "numpy>=1.24.0",
+    "gymnasium>=0.29.0",
+    "matplotlib>=3.7.0",
+    "Pillow>=10.0.0",
+    "scipy>=1.10.0",
+]
+
+[project.optional-dependencies]
+rl = [
+    "stable-baselines3>=2.1.0",
+    "torch>=2.0.0",
+]
+dev = [
+    "pytest>=7.0",
+    "ruff>=0.1.0",
+    "black>=23.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/pybullet-swarm-sim/pybullet-swarm-sim"
+Documentation = "https://github.com/pybullet-swarm-sim/pybullet-swarm-sim#readme"
+Repository = "https://github.com/pybullet-swarm-sim/pybullet-swarm-sim"
+Issues = "https://github.com/pybullet-swarm-sim/pybullet-swarm-sim/issues"
+
+[tool.setuptools.packages.find]
+include = ["swarm_sim*"]
+
+[tool.setuptools.package-data]
+"swarm_sim" = ["assets/*.urdf", "assets/*.dae"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
