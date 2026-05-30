@@ -102,7 +102,9 @@ class FormationPlanner:
     @staticmethod
     def _ring(n: int, s: float) -> np.ndarray:
         """Circular ring in the XY plane."""
-        radius = (n * s) / (2 * np.pi) if n > 1 else 0.0
+        if n <= 1:
+            return np.zeros((n, 3))
+        radius = (n * s) / (2 * np.pi)
         angles = np.linspace(0, 2 * np.pi, n, endpoint=False)
         return np.column_stack([
             radius * np.cos(angles),
@@ -112,12 +114,19 @@ class FormationPlanner:
 
     @staticmethod
     def _helix(n: int, s: float) -> np.ndarray:
-        """3-D helical spiral rising along z."""
+        """3-D helical spiral with z-offsets symmetric around the centre.
+
+        The helix rises from ``-total_height/2`` to ``+total_height/2`` so that
+        after mean-centering no drone ends up with a large negative z-offset
+        that would push its target underground.
+        """
         radius = s * 2
-        height_step = s * 0.5
+        height_step = s * 0.4
+        total_height = (n - 1) * height_step
         angles = np.linspace(0, 4 * np.pi, n, endpoint=False)
+        z_vals = np.linspace(-total_height / 2, total_height / 2, n)
         return np.column_stack([
             radius * np.cos(angles),
             radius * np.sin(angles),
-            np.arange(n) * height_step,
+            z_vals,
         ])
