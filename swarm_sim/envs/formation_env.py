@@ -46,22 +46,49 @@ class FormationEnv(BaseSwarmEnv):
         formation: FormationType = FormationType.V,
         spacing: float = 0.5,
         forward_speed: float = 0.3,
+        hover_altitude: float = 1.0,
         max_steps: int = 2000,
         **kwargs,
     ):
-        super().__init__(**kwargs)
-        self.formation = formation
-        self.spacing = spacing
+        # Compute formation offsets BEFORE calling super().__init__
+        # so we can derive initial_xyzs from them.
+        self._formation = formation
+        self._spacing = spacing
+        self._hover_altitude = hover_altitude
         self.forward_speed = forward_speed
         self.MAX_STEPS = max_steps
         self.planner = FormationPlanner()
 
-        # Compute static formation offsets (relative to centre)
+        # We need num_drones before super().__init__ to compute offsets.
+        # It is either passed explicitly or defaults to 1.
+        num = kwargs.get("num_drones", 1)
+
         self._offsets = self.planner.compute_offsets(
-            formation=self.formation,
-            num_drones=self.NUM_DRONES,
-            spacing=self.spacing,
+            formation=formation,
+            num_drones=num,
+            spacing=spacing,
         )
+
+        # Ensure no drone targets are below minimum safe altitude
+        min_z_offset = self._offsets[:, 2].min()
+        if min_z_offset < 0:
+            # Shift the hover altitude up so the lowest drone is still
+            # at a safe height (>= 0.3 m)
+            self._hover_altitude = max(hover_altitude, -min_z_offset + 0.5)
+
+        # Spawn drones directly at their t=0 formation positions so they
+        # start in-place at the correct altitude instead of on the ground.
+        initial_positions = self._offsets.copy()
+        initial_positions[:, 2] += self._hover_altitude
+
+        # Only override initial_xyzs if not explicitly provided by the caller.
+        if "initial_xyzs" not in kwargs:
+            kwargs["initial_xyzs"] = initial_positions
+
+        super().__init__(**kwargs)
+
+        self.formation = formation
+        self.spacing = spacing
 
     # ------------------------------------------------------------------
     # Public
@@ -70,7 +97,7 @@ class FormationEnv(BaseSwarmEnv):
     def get_current_targets(self) -> np.ndarray:
         """Return the ``(num_drones, 3)`` target positions for this timestep."""
         t = self.step_counter * self.PYB_TIMESTEP
-        centre = np.array([self.forward_speed * t, 0.0, 1.0])
+        centre = np.array([self.forward_speed * t, 0.0, self._hover_altitude])
         return self._offsets + centre
 
     # ------------------------------------------------------------------
