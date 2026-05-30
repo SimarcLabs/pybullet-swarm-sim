@@ -21,8 +21,11 @@ from __future__ import annotations
 
 import numpy as np
 
+from swarm_sim.core.state import SwarmState
+from swarm_sim.algorithms.base_algorithm import BaseAlgorithm
 
-class ACOPathPlanner:
+
+class ACOPathPlanner(BaseAlgorithm):
     """Ant Colony Optimization for cooperative drone path planning.
 
     The search space is discretised into a 3-D grid.  Each cell holds a
@@ -67,8 +70,10 @@ class ACOPathPlanner:
         self.num_drones = num_drones
         self.alpha = alpha
         self.beta = beta
+        self.beta = beta
         self.rho = rho
         self.q = q
+        super().__init__(num_drones=num_drones)
 
         # Initialise uniform pheromone field
         self.pheromone = np.ones((grid_size, grid_size, grid_size)) * 0.1
@@ -80,23 +85,26 @@ class ACOPathPlanner:
 
     def compute(
         self,
-        positions: np.ndarray,
-        goal: np.ndarray,
+        state: SwarmState,
     ) -> np.ndarray:
         """Run one ACO step: evaporate, deposit, choose next waypoint.
 
         Parameters
         ----------
-        positions : np.ndarray
-            ``(N, 3)`` current drone positions.
-        goal : np.ndarray
-            ``(3,)`` goal position.
+        state : SwarmState
+            The current state of the swarm. Goal is taken from state.targets[0].
 
         Returns
         -------
         np.ndarray
             ``(N, 3)`` next waypoint for each drone (world coordinates).
         """
+        positions = state.positions
+        if state.targets is not None and len(state.targets) > 0:
+            goal = state.targets[0]
+        else:
+            goal = np.array([0.0, 0.0, 0.0])
+            
         N = positions.shape[0]
 
         # --- Phase 1: Evaporate pheromone ---

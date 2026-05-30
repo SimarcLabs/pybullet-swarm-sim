@@ -21,8 +21,11 @@ from __future__ import annotations
 
 import numpy as np
 
+from swarm_sim.core.state import SwarmState
+from swarm_sim.algorithms.base_algorithm import BaseAlgorithm
 
-class ConsensusAlgorithm:
+
+class ConsensusAlgorithm(BaseAlgorithm):
     """Linear consensus protocol for multi-drone rendezvous.
 
     Parameters
@@ -49,26 +52,26 @@ class ConsensusAlgorithm:
         self.num_drones = num_drones
         self.gain = gain
         self.mode = mode
+        super().__init__(num_drones=num_drones)
 
     def compute(
         self,
-        positions: np.ndarray,
-        adjacency: np.ndarray,
+        state: SwarmState,
     ) -> np.ndarray:
         """Compute velocity targets via the consensus protocol.
 
         Parameters
         ----------
-        positions : np.ndarray
-            ``(N, 3)`` current drone positions.
-        adjacency : np.ndarray
-            ``(N, N)`` symmetric adjacency matrix (1 = connected).
+        state : SwarmState
+            The current state of the swarm. Expects 'neighbor_graph' for adjacency.
 
         Returns
         -------
         np.ndarray
             ``(N, 3)`` velocity targets.
         """
+        positions = state.positions
+        adjacency = state.neighbor_graph
         N = positions.shape[0]
         vel = np.zeros((N, 3))
 

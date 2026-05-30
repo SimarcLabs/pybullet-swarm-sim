@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyBullet Swarm Sim</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <link rel="stylesheet" href="/static/style.css?v=4">
+</head>
+<body>
+    <header class="top-nav">
+        <div class="logo">
+            <i class="fa-solid fa-satellite-dish" style="color: #FF4D00;"></i>
+            <span>Pybullet-Swarm-Sim</span>
+        </div>
+        <div class="nav-links">
+            <a href="https://github.com/SimarcLabs/pybullet-swarm-sim" target="_blank"><i class="fa-brands fa-github fa-lg" style="color: white;"></i></a>
+        </div>
+    </header>
+
+    <main class="container">
+        
+        <!-- PANEL 1: SELECTION -->
+        <section id="panel-select" class="panel active">
+            <div class="hero">
+                <h1>Swarm Simulation Configuration</h1>
+                <p>Select an algorithm, configure parameters, and launch the PyBullet simulation.</p>
+            </div>
+
+            <!-- Algorithm Grid (Blueprint style) -->
+            <div class="blueprint-container">
+                <div class="algo-grid" id="algo-grid">
+                    <!-- Cards injected via JS -->
+                </div>
+            </div>
+
+            <!-- Configuration Section -->
+            <div class="config-grid">
+                <!-- Drones -->
+                <div class="config-col">
+                    <div class="config-header">Number of Drones</div>
+                    <div class="config-body">
+                        <div class="slider-control">
+                            <button id="btn-drone-minus" class="btn-ctrl">-</button>
+                            <span id="drones-val" class="val-display">20</span>
+                            <button id="btn-drone-plus" class="btn-ctrl">+</button>
+                        </div>
+                        <div class="slider-track-container">
+                            <span class="range-label">5</span>
+                            <input type="range" id="drones-slider" min="5" max="100" value="20">
+                            <span class="range-label">100</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Duration -->
+                <div class="config-col">
+                    <div class="config-header">Duration (sec)</div>
+                    <div class="config-body">
+                        <div class="slider-control">
+                            <button id="btn-time-minus" class="btn-ctrl">-</button>
+                            <span id="duration-val" class="val-display">10</span>
+                            <button id="btn-time-plus" class="btn-ctrl">+</button>
+                        </div>
+                        <div class="slider-track-container">
+                            <span class="range-label">5</span>
+                            <input type="range" id="duration-slider" min="5" max="100" step="5" value="10">
+                            <span class="range-label">100</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Extra Options container for Formation / Custom -->
+            <div id="extra-options-container" class="config-grid hidden" style="margin-top: 1rem;">
+                <div class="config-col" id="formation-select-group">
+                    <div class="config-header">Formation Shape</div>
+                    <div class="config-body" style="justify-content: center;">
+                        <select id="formation-type" class="dropdown">
+                            <option value="line">Line</option>
+                            <option value="v" selected>V-Shape</option>
+                            <option value="grid">Grid</option>
+                            <option value="ring">Ring</option>
+                            <option value="helix">Helix</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="config-col" id="custom-upload-group">
+                    <div class="config-header">Upload Algorithm (.py)</div>
+                    <div class="config-body" style="justify-content: center;">
+                        <input type="file" id="custom-file" accept=".py" class="file-input">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Simulation Overview -->
+            <div class="overview-panel">
+                <div class="overview-header">Simulation Overview</div>
+                <div class="overview-body">
+                    
+                    <div class="stat-block">
+                        <i class="fa-solid fa-microchip stat-icon-bg"></i>
+                        <div class="stat-info">
+                            <span class="stat-val orange" id="ov-drones">20</span>
+                            <span class="stat-lbl">DRONES<br>TOTAL</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-block">
+                        <i class="fa-solid fa-clock stat-icon-bg"></i>
+                        <div class="stat-info">
+                            <span class="stat-val orange" id="ov-duration">10<span style="font-size: 0.5em">s</span></span>
+                            <span class="stat-lbl">DURATION<br>SECONDS</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-block">
+                        <i class="fa-solid fa-play stat-icon-bg" style="color: #FF4D00;"></i>
+                        <div class="stat-info">
+                            <span class="stat-val orange" id="ov-status">READY</span>
+                            <span class="stat-lbl">STATUS<br>IDLE</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-block">
+                        <i class="fa-solid fa-chart-line stat-icon-bg"></i>
+                        <div class="stat-info">
+                            <span class="stat-val orange" id="ov-progress">0%</span>
+                            <span class="stat-lbl">PROGRESS<br>NOT STARTED</span>
+                        </div>
+                    </div>
+                    
+                    <div class="btn-container">
+                        <button id="btn-launch" class="btn-run" disabled>
+                            <i class="fa-solid fa-play"></i> RUN SIMULATION
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+            
+            <!-- Terminal for progress logs (hidden by default) -->
+            <div class="terminal hidden" id="terminal-container" style="margin-top: 1rem;">
+                <div class="terminal-body" id="terminal-output"></div>
+            </div>
+        </section>
+
+        <!-- PANEL 3: RESULTS -->
+        <section id="panel-results" class="panel hidden">
+            <div class="results-header">
+                <h2>Simulation Complete</h2>
+                <button id="btn-reset" class="btn-run" style="padding: 0.5rem 1rem;">
+                    <i class="fa-solid fa-rotate-left"></i> RUN ANOTHER
+                </button>
+            </div>
+            
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-microchip"></i></div>
+                    <div class="stat-details">
+                        <span class="stat-label">Algorithm</span>
+                        <span class="stat-value" id="stat-algo">--</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-jet-fighter"></i></div>
+                    <div class="stat-details">
+                        <span class="stat-label">Drones</span>
+                        <span class="stat-value" id="stat-drones">--</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+                    <div class="stat-details">
+                        <span class="stat-label">Duration</span>
+                        <span class="stat-value" id="stat-duration">--</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                    <div class="stat-details">
+                        <span class="stat-label">Health Score</span>
+                        <span class="stat-value" id="stat-health">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="plot-container">
+                <div class="plot-header">
+                    <h3><i class="fa-solid fa-cubes"></i> 3-D Trajectory Analysis</h3>
+                </div>
+                <div id="plotly-div" class="plotly-div"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="/static/app.js?v=3"></script>
+</body>
+</html>

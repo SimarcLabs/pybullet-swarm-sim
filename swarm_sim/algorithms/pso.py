@@ -22,8 +22,11 @@ from __future__ import annotations
 
 import numpy as np
 
+from swarm_sim.core.state import SwarmState
+from swarm_sim.algorithms.base_algorithm import BaseAlgorithm
 
-class PSOAlgorithm:
+
+class PSOAlgorithm(BaseAlgorithm):
     """Particle Swarm Optimization for drone swarm search / exploration.
 
     Parameters
@@ -61,6 +64,7 @@ class PSOAlgorithm:
         self.c1 = c1
         self.c2 = c2
         self.max_speed = max_speed
+        super().__init__(num_drones=num_drones)
 
         # PSO state
         self._pbest_pos = None  # (N, 3)  personal best positions
@@ -86,27 +90,24 @@ class PSOAlgorithm:
 
     def compute(
         self,
-        positions: np.ndarray,
-        velocities: np.ndarray,
-        fitness: np.ndarray,
+        state: SwarmState,
     ) -> np.ndarray:
         """Run one PSO update step and return velocity targets.
 
         Parameters
         ----------
-        positions : np.ndarray
-            ``(N, 3)`` current drone positions.
-        velocities : np.ndarray
-            ``(N, 3)`` current velocities (informational; PSO maintains its own).
-        fitness : np.ndarray
-            ``(N,)`` fitness value at each drone's current position.
-            Higher is better (the algorithm *maximises* fitness).
+        state : SwarmState
+            The current state of the swarm. Expects 'fitness' in state.sensor_readings.
 
         Returns
         -------
         np.ndarray
             ``(N, 3)`` velocity targets for the next control step.
         """
+        positions = state.positions
+        velocities = state.velocities
+        fitness = state.sensor_readings.get('fitness', np.zeros(positions.shape[0]))
+
         if self._pbest_pos is None:
             self.reset(positions)
 

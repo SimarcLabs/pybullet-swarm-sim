@@ -20,8 +20,11 @@ from __future__ import annotations
 
 import numpy as np
 
+from swarm_sim.core.state import SwarmState
+from swarm_sim.algorithms.base_algorithm import BaseAlgorithm
 
-class FlockingAlgorithm:
+
+class FlockingAlgorithm(BaseAlgorithm):
     """Reynolds boids flocking with configurable radii and weights.
 
     Parameters
@@ -63,26 +66,26 @@ class FlockingAlgorithm:
         self.w_align = w_alignment
         self.w_coh = w_cohesion
         self.max_speed = max_speed
+        super().__init__(num_drones=num_drones)
 
     def compute(
         self,
-        positions: np.ndarray,
-        velocities: np.ndarray,
+        state: SwarmState,
     ) -> np.ndarray:
         """Compute desired velocity for every drone using boid rules.
 
         Parameters
         ----------
-        positions : np.ndarray
-            ``(N, 3)`` current XYZ positions.
-        velocities : np.ndarray
-            ``(N, 3)`` current velocity vectors.
+        state : SwarmState
+            The current state of the swarm.
 
         Returns
         -------
         np.ndarray
             ``(N, 3)`` target velocity vectors (pass to PID as velocity setpoint).
         """
+        positions = state.positions
+        velocities = state.velocities
         N = positions.shape[0]
         targets = np.zeros((N, 3))
 
