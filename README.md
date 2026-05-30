@@ -40,7 +40,7 @@ The library is designed to be minimal in setup and maximal in capability — res
 
 | Configure | Run | Observe |
 |:---:|:---:|:---:|
-| <img src="docs/images/demo-2.png" width="400" /> | <img src="docs/images/demo-1.png" width="400" /> | <img src="docs/images/demo-7.png" width="400" /> |
+| <img src="docs/images/demo-2.png" width="400" /> | <img src="docs/images/demo-1.png" width="400" /> | <img src="docs/images/demo-3.png" width="400" /> |
 | **Analyze** | **Benchmark** | **Export** |
 | <img src="docs/images/demo-4.png" width="400" /> | <img src="docs/images/demo-5.png" width="400" /> | <img src="docs/images/demo-6.png" width="400" /> |
 
