@@ -1,44 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PyBullet Swarm Sim</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
-    <link rel="stylesheet" href="/static/style.css?v=4">
+    <link rel="stylesheet" href="/static/style.css?v=6">
 </head>
+
 <body>
     <header class="top-nav">
         <div class="logo">
-            <i class="fa-solid fa-satellite-dish" style="color: #FF4D00;"></i>
-            <span>Pybullet-Swarm-Sim</span>
+            <img src="/assets/logo_sim.png" width="40" height="40" alt="Logo">
+            <span>PyBullet Swarm Sim</span>
         </div>
         <div class="nav-links">
-            <a href="https://github.com/SimarcLabs/pybullet-swarm-sim" target="_blank"><i class="fa-brands fa-github fa-lg" style="color: white;"></i></a>
+            <a href="https://github.com/SimarcLabs/pybullet-swarm-sim" target="_blank">
+                <i class="fa-brands fa-github fa-lg"></i>
+            </a>
         </div>
     </header>
 
+    <!-- ═══════════════════ WORKFLOW PROGRESS BAR ═══════════════════ -->
+    <div class="workflow-bar">
+        <div class="workflow-step active" data-step="configure">
+            <div class="step-marker">1</div>
+            <span>Configure</span>
+        </div>
+        <div class="workflow-connector"></div>
+        <div class="workflow-step" data-step="run">
+            <div class="step-marker">2</div>
+            <span>Run</span>
+        </div>
+        <div class="workflow-connector"></div>
+        <div class="workflow-step" data-step="observe">
+            <div class="step-marker">3</div>
+            <span>Observe</span>
+        </div>
+        <div class="workflow-connector"></div>
+        <div class="workflow-step" data-step="analyze">
+            <div class="step-marker">4</div>
+            <span>Analyze</span>
+        </div>
+        <div class="workflow-connector"></div>
+        <div class="workflow-step" data-step="benchmark">
+            <div class="step-marker">5</div>
+            <span>Benchmark</span>
+        </div>
+        <div class="workflow-connector"></div>
+        <div class="workflow-step" data-step="export">
+            <div class="step-marker">6</div>
+            <span>Export</span>
+        </div>
+    </div>
+
     <main class="container">
-        
-        <!-- PANEL 1: SELECTION -->
-        <section id="panel-select" class="panel active">
+
+        <!-- ═══════════════════ PANEL 1: CONFIGURE ═══════════════════ -->
+        <section id="panel-configure" class="panel active">
             <div class="hero">
                 <h1>Swarm Simulation Configuration</h1>
                 <p>Select an algorithm, configure parameters, and launch the PyBullet simulation.</p>
             </div>
 
-            <!-- Algorithm Grid (Blueprint style) -->
+            <!-- Algorithm Grid -->
             <div class="blueprint-container">
-                <div class="algo-grid" id="algo-grid">
-                    <!-- Cards injected via JS -->
-                </div>
+                <div class="algo-grid" id="algo-grid"></div>
             </div>
 
             <!-- Configuration Section -->
             <div class="config-grid">
-                <!-- Drones -->
                 <div class="config-col">
                     <div class="config-header">Number of Drones</div>
                     <div class="config-body">
@@ -54,8 +88,6 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Duration -->
                 <div class="config-col">
                     <div class="config-header">Duration (sec)</div>
                     <div class="config-body">
@@ -72,9 +104,9 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Extra Options container for Formation / Custom -->
-            <div id="extra-options-container" class="config-grid hidden" style="margin-top: 1rem;">
+            <div id="extra-options-container" class="config-grid hidden" style="margin-top: -2rem; margin-bottom: 2rem;">
                 <div class="config-col" id="formation-select-group">
                     <div class="config-header">Formation Shape</div>
                     <div class="config-body" style="justify-content: center;">
@@ -99,104 +131,287 @@
             <div class="overview-panel">
                 <div class="overview-header">Simulation Overview</div>
                 <div class="overview-body">
-                    
                     <div class="stat-block">
                         <i class="fa-solid fa-microchip stat-icon-bg"></i>
                         <div class="stat-info">
-                            <span class="stat-val orange" id="ov-drones">20</span>
-                            <span class="stat-lbl">DRONES<br>TOTAL</span>
+                            <span class="stat-val accent" id="ov-drones">20</span>
+                            <span class="stat-lbl">DRONES</span>
                         </div>
                     </div>
-                    
                     <div class="stat-block">
                         <i class="fa-solid fa-clock stat-icon-bg"></i>
                         <div class="stat-info">
-                            <span class="stat-val orange" id="ov-duration">10<span style="font-size: 0.5em">s</span></span>
-                            <span class="stat-lbl">DURATION<br>SECONDS</span>
+                            <span class="stat-val accent" id="ov-duration">10<span class="unit">s</span></span>
+                            <span class="stat-lbl">DURATION</span>
                         </div>
                     </div>
-                    
                     <div class="stat-block">
-                        <i class="fa-solid fa-play stat-icon-bg" style="color: #FF4D00;"></i>
+                        <i class="fa-solid fa-play stat-icon-bg"></i>
                         <div class="stat-info">
-                            <span class="stat-val orange" id="ov-status">READY</span>
-                            <span class="stat-lbl">STATUS<br>IDLE</span>
+                            <span class="stat-val accent" id="ov-status">READY</span>
+                            <span class="stat-lbl">STATUS</span>
                         </div>
                     </div>
-                    
-                    <div class="stat-block">
+                    <div class="stat-block last">
                         <i class="fa-solid fa-chart-line stat-icon-bg"></i>
                         <div class="stat-info">
-                            <span class="stat-val orange" id="ov-progress">0%</span>
-                            <span class="stat-lbl">PROGRESS<br>NOT STARTED</span>
+                            <span class="stat-val accent" id="ov-progress">0%</span>
+                            <span class="stat-lbl">PROGRESS</span>
                         </div>
                     </div>
-                    
                     <div class="btn-container">
-                        <button id="btn-launch" class="btn-run" disabled>
+                        <button id="btn-launch" class="btn-primary" disabled>
                             <i class="fa-solid fa-play"></i> RUN SIMULATION
                         </button>
                     </div>
-
                 </div>
             </div>
-            
-            <!-- Terminal for progress logs (hidden by default) -->
-            <div class="terminal hidden" id="terminal-container" style="margin-top: 1rem;">
+
+            <!-- Terminal for progress logs -->
+            <div class="terminal hidden" id="terminal-container">
+                <div class="terminal-header">
+                    <span><i class="fa-solid fa-terminal"></i> Simulation Output</span>
+                    <span class="terminal-badge" id="terminal-badge">RUNNING</span>
+                </div>
                 <div class="terminal-body" id="terminal-output"></div>
             </div>
         </section>
 
-        <!-- PANEL 3: RESULTS -->
-        <section id="panel-results" class="panel hidden">
-            <div class="results-header">
-                <h2>Simulation Complete</h2>
-                <button id="btn-reset" class="btn-run" style="padding: 0.5rem 1rem;">
-                    <i class="fa-solid fa-rotate-left"></i> RUN ANOTHER
-                </button>
+        <!-- ═══════════════════ PANEL 2: RUN (handled in-page on panel 1) ═══════════════════ -->
+
+        <!-- ═══════════════════ PANEL 3: OBSERVE — 3D Trajectory ═══════════════════ -->
+        <section id="panel-observe" class="panel">
+            <div class="panel-header-bar">
+                <div class="panel-title">
+                    <i class="fa-solid fa-eye"></i>
+                    <h2>Trajectory Observation</h2>
+                </div>
+                <div class="panel-actions">
+                    <button class="btn-secondary" id="btn-to-analyze">
+                        <i class="fa-solid fa-arrow-right"></i> Analyze
+                    </button>
+                </div>
             </div>
-            
-            <div class="stats-row">
+
+            <!-- Summary stat cards -->
+            <div class="stats-row four-col">
                 <div class="stat-card">
                     <div class="stat-icon"><i class="fa-solid fa-microchip"></i></div>
                     <div class="stat-details">
                         <span class="stat-label">Algorithm</span>
-                        <span class="stat-value" id="stat-algo">--</span>
+                        <span class="stat-value" id="obs-algo">--</span>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon"><i class="fa-solid fa-jet-fighter"></i></div>
                     <div class="stat-details">
                         <span class="stat-label">Drones</span>
-                        <span class="stat-value" id="stat-drones">--</span>
+                        <span class="stat-value" id="obs-drones">--</span>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
                     <div class="stat-details">
                         <span class="stat-label">Duration</span>
-                        <span class="stat-value" id="stat-duration">--</span>
+                        <span class="stat-value" id="obs-duration">--</span>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon"><i class="fa-solid fa-heart-pulse"></i></div>
                     <div class="stat-details">
                         <span class="stat-label">Health Score</span>
-                        <span class="stat-value" id="stat-health">--</span>
+                        <span class="stat-value" id="obs-health">--</span>
                     </div>
                 </div>
             </div>
 
-            <div class="plot-container">
-                <div class="plot-header">
+            <!-- 3D Trajectory Plot -->
+            <div class="chart-card">
+                <div class="chart-header">
                     <h3><i class="fa-solid fa-cubes"></i> 3-D Trajectory Analysis</h3>
                 </div>
-                <div id="plotly-div" class="plotly-div"></div>
+                <div id="plotly-trajectory" class="plotly-div tall"></div>
+            </div>
+
+            <!-- 2D Replay -->
+            <div class="chart-card" style="margin-top: 1.5rem;">
+                <div class="chart-header">
+                    <h3><i class="fa-solid fa-film"></i> 2-D Replay</h3>
+                    <div class="replay-controls">
+                        <button id="btn-replay-play" class="btn-icon"><i class="fa-solid fa-play"></i></button>
+                        <button id="btn-replay-pause" class="btn-icon"><i class="fa-solid fa-pause"></i></button>
+                        <button id="btn-replay-reset" class="btn-icon"><i class="fa-solid fa-rotate-left"></i></button>
+                        <span class="replay-time" id="replay-time">t = 0.000s</span>
+                    </div>
+                </div>
+                <canvas id="replay-canvas" width="900" height="400"></canvas>
+            </div>
+        </section>
+
+        <!-- ═══════════════════ PANEL 4: ANALYZE — Time-series Metrics ═══════════════════ -->
+        <section id="panel-analyze" class="panel">
+            <div class="panel-header-bar">
+                <div class="panel-title">
+                    <i class="fa-solid fa-chart-area"></i>
+                    <h2>Metric Analysis</h2>
+                </div>
+                <div class="panel-actions">
+                    <button class="btn-secondary" id="btn-back-observe">
+                        <i class="fa-solid fa-arrow-left"></i> Observe
+                    </button>
+                    <button class="btn-secondary" id="btn-to-benchmark">
+                        <i class="fa-solid fa-arrow-right"></i> Benchmark
+                    </button>
+                </div>
+            </div>
+
+            <!-- Analysis summary strip -->
+            <div class="stats-row five-col" id="analysis-summary-strip">
+                <div class="stat-card mini">
+                    <span class="stat-label">Cohesion</span>
+                    <span class="stat-value" id="sum-cohesion">--</span>
+                </div>
+                <div class="stat-card mini">
+                    <span class="stat-label">Connectivity</span>
+                    <span class="stat-value" id="sum-connectivity">--</span>
+                </div>
+                <div class="stat-card mini">
+                    <span class="stat-label">Mean Speed</span>
+                    <span class="stat-value" id="sum-speed">--</span>
+                </div>
+                <div class="stat-card mini">
+                    <span class="stat-label">Min Distance</span>
+                    <span class="stat-value" id="sum-min-dist">--</span>
+                </div>
+                <div class="stat-card mini">
+                    <span class="stat-label">Coverage</span>
+                    <span class="stat-value" id="sum-coverage">--</span>
+                </div>
+            </div>
+
+            <!-- Charts grid -->
+            <div class="analysis-grid">
+                <div class="chart-card">
+                    <div class="chart-header"><h3><i class="fa-solid fa-compress"></i> Cohesion</h3></div>
+                    <div id="chart-cohesion" class="plotly-div short"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><h3><i class="fa-solid fa-network-wired"></i> Connectivity</h3></div>
+                    <div id="chart-connectivity" class="plotly-div short"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><h3><i class="fa-solid fa-gauge-high"></i> Speed</h3></div>
+                    <div id="chart-speed" class="plotly-div short"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><h3><i class="fa-solid fa-shield-halved"></i> Collision Safety</h3></div>
+                    <div id="chart-collision" class="plotly-div short"></div>
+                </div>
+                <div class="chart-card full-width">
+                    <div class="chart-header"><h3><i class="fa-solid fa-map"></i> Coverage Accumulation</h3></div>
+                    <div id="chart-coverage" class="plotly-div short"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════ PANEL 5: BENCHMARK ═══════════════════ -->
+        <section id="panel-benchmark" class="panel">
+            <div class="panel-header-bar">
+                <div class="panel-title">
+                    <i class="fa-solid fa-ranking-star"></i>
+                    <h2>Benchmark Report</h2>
+                </div>
+                <div class="panel-actions">
+                    <button class="btn-secondary" id="btn-back-analyze">
+                        <i class="fa-solid fa-arrow-left"></i> Analyze
+                    </button>
+                    <button class="btn-secondary" id="btn-to-export">
+                        <i class="fa-solid fa-arrow-right"></i> Export
+                    </button>
+                </div>
+            </div>
+
+            <div class="benchmark-layout">
+                <!-- Left: Gauge -->
+                <div class="benchmark-gauge-section">
+                    <div class="chart-card">
+                        <div class="chart-header"><h3>Overall Health Score</h3></div>
+                        <div id="gauge-chart" class="plotly-div" style="height:260px;"></div>
+                        <div class="gauge-grade-label">
+                            <span>Grade: </span><span id="bench-grade" class="grade-badge">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Metric Cards -->
+                <div class="benchmark-metrics-section" id="benchmark-cards-container">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+
+            <!-- Emergence Detection -->
+            <div class="chart-card" style="margin-top: 1.5rem;">
+                <div class="chart-header">
+                    <h3><i class="fa-solid fa-brain"></i> Emergence Detection</h3>
+                </div>
+                <div class="emergence-body" id="emergence-container">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════ PANEL 6: EXPORT ═══════════════════ -->
+        <section id="panel-export" class="panel">
+            <div class="panel-header-bar">
+                <div class="panel-title">
+                    <i class="fa-solid fa-file-export"></i>
+                    <h2>Export Results</h2>
+                </div>
+                <div class="panel-actions">
+                    <button class="btn-secondary" id="btn-back-benchmark">
+                        <i class="fa-solid fa-arrow-left"></i> Benchmark
+                    </button>
+                    <button class="btn-primary" id="btn-new-run">
+                        <i class="fa-solid fa-rotate-left"></i> New Simulation
+                    </button>
+                </div>
+            </div>
+
+            <div class="export-grid">
+                <div class="export-card" id="export-report">
+                    <div class="export-icon"><i class="fa-solid fa-file-lines"></i></div>
+                    <h3>Benchmark Report</h3>
+                    <p>Markdown report with health score, metric breakdown, and emergence detection results.</p>
+                    <span class="export-tag">report.md</span>
+                </div>
+                <div class="export-card" id="export-metrics">
+                    <div class="export-icon"><i class="fa-solid fa-chart-bar"></i></div>
+                    <h3>Metrics JSON</h3>
+                    <p>Structured JSON with all evaluated metrics, health score, and emergence data.</p>
+                    <span class="export-tag">metrics.json</span>
+                </div>
+                <div class="export-card" id="export-telemetry">
+                    <div class="export-icon"><i class="fa-solid fa-database"></i></div>
+                    <h3>Telemetry Data</h3>
+                    <p>Full per-frame telemetry including positions, velocities, graphs, and battery levels.</p>
+                    <span class="export-tag">telemetry.npz</span>
+                </div>
+                <div class="export-card" id="export-manifest">
+                    <div class="export-icon"><i class="fa-solid fa-file-code"></i></div>
+                    <h3>Run Manifest</h3>
+                    <p>Configuration manifest with algorithm, drone count, duration, and job metadata.</p>
+                    <span class="export-tag">manifest.json</span>
+                </div>
+            </div>
+
+            <div class="export-footer">
+                <p>All artifacts are saved to <code>results/{job_id}/</code> on the server.</p>
             </div>
         </section>
 
     </main>
 
-    <script src="/static/app.js?v=3"></script>
+    <script src="/static/app.js?v=6"></script>
 </body>
+
 </html>

@@ -189,6 +189,7 @@ class BaseSwarmEnv(gym.Env):
                 p.COV_ENABLE_RGB_BUFFER_PREVIEW,
                 p.COV_ENABLE_DEPTH_BUFFER_PREVIEW,
                 p.COV_ENABLE_SEGMENTATION_MARK_PREVIEW,
+                p.COV_ENABLE_GUI,
             ]:
                 p.configureDebugVisualizer(flag, 0, physicsClientId=self.CLIENT)
             p.resetDebugVisualizerCamera(
