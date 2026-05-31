@@ -6,9 +6,10 @@ import os
 import shutil
 import subprocess
 import sys
+import time as _time
 import uuid
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List
 
 import numpy as np
 import plotly.graph_objects as go
@@ -27,6 +28,22 @@ app.mount("/assets", StaticFiles(directory=ASSETS_DIR), name="assets")
 
 # In-memory job tracker
 JOBS: Dict[str, dict] = {}
+
+# Run history — persisted to results/history.json
+HISTORY_PATH = Path("results") / "history.json"
+
+
+def _load_history() -> List[dict]:
+    if HISTORY_PATH.exists():
+        with open(HISTORY_PATH, "r") as f:
+            return json.load(f)
+    return []
+
+
+def _save_history(history: List[dict]):
+    HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with open(HISTORY_PATH, "w") as f:
+        json.dump(history, f, indent=2)
 
 # Palette shared across all Plotly charts
 DRONE_COLORS = [
@@ -109,6 +126,169 @@ async def get_algorithms():
     ]
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Scenario presets — one-click demo configurations
+# ─────────────────────────────────────────────────────────────────────────────
+@app.get("/presets")
+async def get_presets():
+    return [
+        {
+            "id": "search_rescue",
+            "name": "Search & Rescue",
+            "icon": "fa-solid fa-magnifying-glass-location",
+            "desc": "PSO-driven coverage sweep across a 10×10 m area",
+            "algo": "pso",
+            "drones": 12,
+            "duration": 15,
+            "formation_type": "v",
+            "color": "#22c55e",
+        },
+        {
+            "id": "convoy_escort",
+            "name": "Convoy Escort",
+            "icon": "fa-solid fa-truck-fast",
+            "desc": "V-formation following a forward trajectory",
+            "algo": "formation",
+            "drones": 8,
+            "duration": 20,
+            "formation_type": "v",
+            "color": "#06b6d4",
+        },
+        {
+            "id": "perimeter_defense",
+            "name": "Perimeter Defense",
+            "icon": "fa-solid fa-shield-halved",
+            "desc": "Ring formation around a central asset",
+            "algo": "formation",
+            "drones": 10,
+            "duration": 15,
+            "formation_type": "ring",
+            "color": "#8b5cf6",
+        },
+        {
+            "id": "flock_migration",
+            "name": "Flock Migration",
+            "icon": "fa-solid fa-feather-pointed",
+            "desc": "Reynolds Boids with 20 agents in open space",
+            "algo": "flocking",
+            "drones": 20,
+            "duration": 15,
+            "formation_type": "v",
+            "color": "#f59e0b",
+        },
+        {
+            "id": "helix_ascent",
+            "name": "Helix Ascent",
+            "icon": "fa-solid fa-dna",
+            "desc": "Spiral formation climbing through 3D space",
+            "algo": "formation",
+            "drones": 10,
+            "duration": 15,
+            "formation_type": "helix",
+            "color": "#ec4899",
+        },
+        {
+            "id": "consensus_rendezvous",
+            "name": "Consensus Rendezvous",
+            "icon": "fa-solid fa-bullseye",
+            "desc": "Distributed agents converging to a common point",
+            "algo": "consensus",
+            "drones": 15,
+            "duration": 12,
+            "formation_type": "v",
+            "color": "#ef4444",
+        },
+    ]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Run history
+# ─────────────────────────────────────────────────────────────────────────────
+@app.get("/history")
+async def get_history():
+    return _load_history()
+
+
+@app.delete("/history/{job_id}")
+async def delete_history_entry(job_id: str):
+    history = _load_history()
+    history = [h for h in history if h.get("job_id") != job_id]
+    _save_history(history)
+    return {"ok": True}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Comparison endpoint — radar chart from multiple job IDs
+# ─────────────────────────────────────────────────────────────────────────────
+@app.get("/compare")
+async def compare_runs(ids: str):
+    """Compare multiple runs. Query: /compare?ids=abc,def,ghi"""
+    job_ids = [j.strip() for j in ids.split(",") if j.strip()]
+    if not job_ids:
+        return {"error": "No job IDs provided"}
+
+    runs = []
+    categories = ["Coverage", "Cohesion", "Connectivity", "Safety"]
+    metric_keys = ["CoverageMetric", "CohesionMetric", "ConnectivityMetric", "CollisionRateMetric"]
+
+    for jid in job_ids:
+        res_dir = Path("results") / jid
+        json_path = res_dir / "metrics.json"
+        manifest_path = res_dir / "manifest.json"
+        if not json_path.exists() or not manifest_path.exists():
+            continue
+        with open(json_path) as f:
+            md = json.load(f)
+        with open(manifest_path) as f:
+            mf = json.load(f)
+
+        detailed = md.get("metrics", {})
+        values = [round(float(detailed.get(k, 0)) * 100, 1) for k in metric_keys]
+        runs.append({
+            "job_id": jid,
+            "label": f"{mf.get('algo', '?').upper()} · {mf.get('num_drones', '?')}d",
+            "health": round(md.get("health_score", 0) * 100, 1),
+            "values": values,
+        })
+
+    if not runs:
+        return {"error": "No valid runs found"}
+
+    radar_colors = ["#FF4D00", "#06b6d4", "#22c55e", "#8b5cf6", "#f59e0b", "#ec4899"]
+
+    fig = go.Figure()
+    for i, run in enumerate(runs):
+        c = radar_colors[i % len(radar_colors)]
+        fig.add_trace(go.Scatterpolar(
+            r=run["values"] + [run["values"][0]],  # close the polygon
+            theta=categories + [categories[0]],
+            fill='toself',
+            fillcolor=c.replace(")", ", 0.1)").replace("#", "rgba(") if c.startswith("rgba") else f"rgba({int(c[1:3],16)},{int(c[3:5],16)},{int(c[5:7],16)},0.1)",
+            line=dict(color=c, width=2),
+            name=run["label"],
+        ))
+
+    fig.update_layout(
+        polar=dict(
+            bgcolor="rgba(0,0,0,0)",
+            radialaxis=dict(visible=True, range=[0, 100], gridcolor="#333",
+                            tickfont=dict(color="#666", size=9)),
+            angularaxis=dict(gridcolor="#333", tickfont=dict(color="#aaa", size=11)),
+        ),
+        paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="#ccc", family="Inter, sans-serif"),
+        legend=dict(bgcolor="rgba(21,21,21,0.9)", font=dict(color="#f3f4f6", size=10),
+                    bordercolor="#444", borderwidth=1),
+        height=420,
+        margin=dict(l=60, r=60, t=40, b=40),
+    )
+
+    return {
+        "runs": runs,
+        "radar_chart": json.loads(fig.to_json()),
+    }
+
+
 @app.post("/run")
 async def run_simulation(
     algo: str = Form(...),
@@ -156,6 +336,21 @@ async def run_simulation(
         "status": "running"
     }
 
+    # Log to history
+    history = _load_history()
+    history.insert(0, {
+        "job_id": job_id,
+        "algo": algo,
+        "drones": drones,
+        "duration": duration,
+        "formation_type": formation_type,
+        "timestamp": _time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "status": "running",
+    })
+    # Keep at most 50 entries
+    history = history[:50]
+    _save_history(history)
+
     return {"job_id": job_id}
 
 
@@ -183,6 +378,15 @@ async def stream_logs(job_id: str):
 
         process.wait()
         JOBS[job_id]["status"] = "completed"
+
+        # Update history entry status
+        history = _load_history()
+        for entry in history:
+            if entry.get("job_id") == job_id:
+                entry["status"] = "completed"
+                break
+        _save_history(history)
+
         yield "event: done\ndata: complete\n\n"
 
     return StreamingResponse(log_generator(), media_type="text/event-stream")

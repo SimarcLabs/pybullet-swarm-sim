@@ -5,10 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PyBullet Swarm Sim</title>
+    <meta name="description" content="Modular multi-drone swarm simulation with physics-accurate PyBullet environments, swarm intelligence algorithms, and interactive benchmarking.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
-    <link rel="stylesheet" href="/static/style.css?v=6">
+    <link rel="stylesheet" href="/static/style.css?v=8">
 </head>
 
 <body>
@@ -17,9 +18,17 @@
             <img src="/assets/logo_sim.png" width="40" height="40" alt="Logo">
             <span>PyBullet Swarm Sim</span>
         </div>
-        <div class="nav-links">
-            <a href="https://github.com/SimarcLabs/pybullet-swarm-sim" target="_blank">
-                <i class="fa-brands fa-github fa-lg"></i>
+        <div class="nav-right">
+            <button class="btn-ghost" id="btn-toggle-history">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span>History</span>
+            </button>
+            <button class="btn-ghost" id="btn-toggle-compare">
+                <i class="fa-solid fa-code-compare"></i>
+                <span>Compare</span>
+            </button>
+            <a href="https://github.com/SimarcLabs/pybullet-swarm-sim" target="_blank" class="btn-ghost">
+                <i class="fa-brands fa-github"></i>
             </a>
         </div>
     </header>
@@ -57,16 +66,65 @@
         </div>
     </div>
 
+    <!-- ═══════════════════ HISTORY SIDEBAR ═══════════════════ -->
+    <aside class="history-sidebar" id="history-sidebar">
+        <div class="sidebar-header">
+            <h3><i class="fa-solid fa-clock-rotate-left"></i> Run History</h3>
+            <button class="btn-icon" id="btn-close-history"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="sidebar-body" id="history-list">
+            <!-- Populated via JS -->
+        </div>
+    </aside>
+
+    <!-- ═══════════════════ COMPARE MODAL ═══════════════════ -->
+    <div class="modal-overlay hidden" id="compare-overlay">
+        <div class="modal-content compare-modal">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-code-compare"></i> Algorithm Comparison</h3>
+                <button class="btn-icon" id="btn-close-compare"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="compare-select-area">
+                <p>Select runs to compare from history:</p>
+                <div class="compare-checkboxes" id="compare-checkboxes"></div>
+                <button class="btn-primary" id="btn-run-compare">
+                    <i class="fa-solid fa-chart-pie"></i> Generate Comparison
+                </button>
+            </div>
+            <div id="compare-results" class="hidden">
+                <div id="radar-chart" class="plotly-div" style="height:420px;"></div>
+                <div class="compare-table" id="compare-table"></div>
+            </div>
+        </div>
+    </div>
+
     <main class="container">
 
         <!-- ═══════════════════ PANEL 1: CONFIGURE ═══════════════════ -->
         <section id="panel-configure" class="panel active">
             <div class="hero">
-                <h1>Swarm Simulation Configuration</h1>
-                <p>Select an algorithm, configure parameters, and launch the PyBullet simulation.</p>
+                <h1>Swarm Simulation Studio</h1>
+                <p>Select an algorithm or launch a preset scenario to begin physics-accurate swarm simulation.</p>
+            </div>
+
+            <!-- Scenario Presets -->
+            <div class="presets-section">
+                <div class="section-label">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>Quick Launch</span>
+                    <div class="section-line"></div>
+                </div>
+                <div class="preset-grid" id="preset-grid">
+                    <!-- Populated via JS -->
+                </div>
             </div>
 
             <!-- Algorithm Grid -->
+            <div class="section-label" style="margin-top:2rem;">
+                <i class="fa-solid fa-cubes"></i>
+                <span>Algorithms</span>
+                <div class="section-line"></div>
+            </div>
             <div class="blueprint-container">
                 <div class="algo-grid" id="algo-grid"></div>
             </div>
@@ -176,8 +234,6 @@
                 <div class="terminal-body" id="terminal-output"></div>
             </div>
         </section>
-
-        <!-- ═══════════════════ PANEL 2: RUN (handled in-page on panel 1) ═══════════════════ -->
 
         <!-- ═══════════════════ PANEL 3: OBSERVE — 3D Trajectory ═══════════════════ -->
         <section id="panel-observe" class="panel">
@@ -411,7 +467,7 @@
 
     </main>
 
-    <script src="/static/app.js?v=6"></script>
+    <script src="/static/app.js?v=8"></script>
 </body>
 
 </html>

@@ -38,6 +38,7 @@ dependencies = [
 rl = [
     "stable-baselines3>=2.1.0",
     "torch>=2.0.0",
+    "tensorboard>=2.14.0",
 ]
 dev = [
     "pytest>=7.0",

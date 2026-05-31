@@ -9,3 +9,4 @@ scipy>=1.10.0
 # Optional: RL training (install with: pip install pybullet-swarm-sim[rl])
 # stable-baselines3>=2.1.0
 # torch>=2.0.0
+# tensorboard>=2.14.0
