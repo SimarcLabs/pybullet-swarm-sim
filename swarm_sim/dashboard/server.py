@@ -117,6 +117,31 @@ async def get_algorithms():
             "desc": "Distributed rendezvous & coverage"
         },
         {
+            "id": "abc",
+            "name": "Artificial Bee Colony",
+            "icon": "fa-solid fa-bug-slash",
+            "desc": "Honey bee foraging dynamics"
+        },
+        {
+            "id": "apf",
+            "name": "Potential Fields",
+            "icon": "fa-solid fa-magnet",
+            "desc": "Obstacle repulsion & goal attraction"
+        },
+        {
+            "id": "marl",
+            "name": "MARL (PPO)",
+            "icon": "fa-solid fa-brain",
+            "desc": "Multi-agent reinforcement learning",
+            "has_marl": True
+        },
+        {
+            "id": "voronoi",
+            "name": "Voronoi Coverage",
+            "icon": "fa-solid fa-chart-pie",
+            "desc": "Lloyd's algorithm spatial dispersion"
+        },
+        {
             "id": "custom",
             "name": "Custom Upload",
             "icon": "fa-solid fa-file-arrow-up",
@@ -287,6 +312,81 @@ async def compare_runs(ids: str):
         "runs": runs,
         "radar_chart": json.loads(fig.to_json()),
     }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MARL — training endpoint & model status
+# ─────────────────────────────────────────────────────────────────────────────
+@app.get("/marl/models")
+async def list_marl_models():
+    """Return available pre-trained MARL models."""
+    models_dir = Path("models")
+    if not models_dir.exists():
+        return {"models": []}
+    models = []
+    for f in sorted(models_dir.glob("marl_ppo_*d.zip")):
+        # Extract drone count from filename pattern: marl_ppo_5d.zip
+        stem = f.stem  # marl_ppo_5d
+        parts = stem.split("_")
+        try:
+            drones = int(parts[-1].replace("d", ""))
+        except (ValueError, IndexError):
+            drones = 0
+        models.append({
+            "filename": f.name,
+            "path": str(f),
+            "drones": drones,
+            "size_mb": round(f.stat().st_size / (1024 * 1024), 2),
+        })
+    return {"models": models}
+
+
+@app.post("/marl/train")
+async def start_marl_training(
+    drones: int = Form(5),
+    timesteps: int = Form(50000),
+):
+    """Spawn a MARL training job in the background."""
+    job_id = "marl-" + str(uuid.uuid4())[:8]
+
+    trainer_path = Path(__file__).parent.parent / "training" / "marl_train.py"
+
+    cmd = [
+        sys.executable, str(trainer_path),
+        "--drones", str(drones),
+        "--timesteps", str(timesteps),
+        "--job-id", job_id,
+    ]
+
+    process = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+    )
+
+    JOBS[job_id] = {
+        "process": process,
+        "status": "training",
+    }
+
+    # Log to history
+    history = _load_history()
+    history.insert(0, {
+        "job_id": job_id,
+        "algo": "marl-train",
+        "drones": drones,
+        "duration": 0,
+        "formation_type": "n/a",
+        "timestamp": _time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "status": "training",
+        "timesteps": timesteps,
+    })
+    history = history[:50]
+    _save_history(history)
+
+    return {"job_id": job_id}
 
 
 @app.post("/run")

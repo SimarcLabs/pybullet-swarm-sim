@@ -129,6 +129,16 @@
                 <div class="algo-grid" id="algo-grid"></div>
             </div>
 
+            <!-- Explore More Algorithms -->
+            <div class="section-label" style="margin-top:2rem;">
+                <i class="fa-solid fa-rocket"></i>
+                <span>Explore Future Algorithms</span>
+                <div class="section-line"></div>
+            </div>
+            <div class="blueprint-container">
+                <div class="algo-grid upcoming-grid" id="upcoming-grid"></div>
+            </div>
+
             <!-- Configuration Section -->
             <div class="config-grid">
                 <div class="config-col">
@@ -181,6 +191,52 @@
                     <div class="config-header">Upload Algorithm (.py)</div>
                     <div class="config-body" style="justify-content: center;">
                         <input type="file" id="custom-file" accept=".py" class="file-input">
+                    </div>
+                </div>
+            </div>
+
+            <!-- MARL Training Panel -->
+            <div id="marl-panel" class="marl-panel hidden">
+                <div class="section-label" style="margin-bottom: 1rem;">
+                    <i class="fa-solid fa-brain"></i>
+                    <span>MARL Configuration</span>
+                    <div class="section-line"></div>
+                </div>
+                <div class="marl-grid">
+                    <div class="marl-card">
+                        <div class="marl-card-header">
+                            <i class="fa-solid fa-graduation-cap"></i> Train New Model
+                        </div>
+                        <div class="marl-card-body">
+                            <p class="marl-hint">Train a shared-parameter PPO policy on headless simulation. The model learns cooperative goal-seeking with collision avoidance.</p>
+                            <div class="marl-field">
+                                <label>Training Timesteps</label>
+                                <select id="marl-timesteps" class="dropdown">
+                                    <option value="10000">10K (Quick test ~2 min)</option>
+                                    <option value="50000" selected>50K (Standard ~10 min)</option>
+                                    <option value="100000">100K (Extended ~20 min)</option>
+                                    <option value="250000">250K (Research ~45 min)</option>
+                                </select>
+                            </div>
+                            <button id="btn-marl-train" class="btn-primary" style="width:100%;margin-top:0.75rem;">
+                                <i class="fa-solid fa-play"></i> Start Training
+                            </button>
+                            <div id="marl-train-status" class="marl-status hidden">
+                                <div class="marl-progress-bar"><div id="marl-progress-fill" class="marl-progress-fill"></div></div>
+                                <span id="marl-progress-text" class="marl-progress-text">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="marl-card">
+                        <div class="marl-card-header">
+                            <i class="fa-solid fa-box-open"></i> Available Models
+                        </div>
+                        <div class="marl-card-body">
+                            <div id="marl-model-list" class="marl-model-list">
+                                <div class="marl-hint" style="text-align:center;padding:1rem 0;">Loading models...</div>
+                            </div>
+                            <p class="marl-hint" style="margin-top:0.5rem;">Select a model, then click <strong>Run Simulation</strong> to see the learned behavior. If no model matches your drone count, a cooperative heuristic is used.</p>
+                        </div>
                     </div>
                 </div>
             </div>

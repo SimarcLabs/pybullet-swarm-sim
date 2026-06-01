@@ -28,6 +28,10 @@ from swarm_sim.algorithms.flocking import FlockingAlgorithm
 from swarm_sim.algorithms.consensus import ConsensusAlgorithm
 from swarm_sim.algorithms.pso import PSOAlgorithm
 from swarm_sim.algorithms.aco import ACOPathPlanner
+from swarm_sim.algorithms.apf import APFAlgorithm
+from swarm_sim.algorithms.abc import ABCAlgorithm
+from swarm_sim.algorithms.voronoi_coverage import VoronoiCoverageAlgorithm
+from swarm_sim.algorithms.marl import MARLAlgorithm
 
 
 def load_custom_algorithm(filepath: str):
@@ -86,6 +90,19 @@ def run_simulation(
             algorithm = ACOPathPlanner(grid_size=10, num_drones=num_drones)
         elif algo == "consensus":
             algorithm = ConsensusAlgorithm(mode="rendezvous", gain=0.5)
+        elif algo == "apf":
+            algorithm = APFAlgorithm(num_drones=num_drones)
+        elif algo == "abc":
+            algorithm = ABCAlgorithm(num_drones=num_drones)
+        elif algo == "voronoi":
+            algorithm = VoronoiCoverageAlgorithm(num_drones=num_drones)
+        elif algo == "marl":
+            # Look for a trained model matching drone count
+            model_path = Path("models") / f"marl_ppo_{num_drones}d.zip"
+            algorithm = MARLAlgorithm(
+                num_drones=num_drones,
+                model_path=str(model_path) if model_path.exists() else None,
+            )
         elif algo == "custom" and custom_algo_path:
             CustomAlgoClass = load_custom_algorithm(custom_algo_path)
             try:

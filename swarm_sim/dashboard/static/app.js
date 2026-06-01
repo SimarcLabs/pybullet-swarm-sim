@@ -88,14 +88,29 @@ function launchPreset(p){
 
 // ═══════════════════ ALGORITHMS ═══════════════════
 fetch("/algorithms").then(r=>r.json()).then(algos=>{
+    const upcomingGrid=$("upcoming-grid");
+    let hasUpcoming=false;
     algos.forEach(algo=>{
         const card=document.createElement("div");
-        card.className="algo-card";
-        if(algo.is_custom) card.classList.add("custom-card");
-        card.innerHTML=`<div class="card-icon"><i class="${algo.icon}"></i></div><h3>${algo.name}</h3><p>${algo.desc}</p>`;
-        card.addEventListener("click",()=>selectAlgo(card,algo));
-        algoGrid.appendChild(card);
+        if(algo.is_upcoming) {
+            hasUpcoming=true;
+            card.className="algo-card upcoming-card";
+            card.innerHTML=`<div class="card-icon"><i class="${algo.icon}"></i></div><h3>${algo.name}</h3><p>${algo.desc}</p><span class="upcoming-badge">IN DEV</span>`;
+            card.addEventListener("click",()=>alert(algo.name + " is currently in development! Stay tuned."));
+            upcomingGrid.appendChild(card);
+        } else {
+            card.className="algo-card";
+            if(algo.is_custom) card.classList.add("custom-card");
+            card.innerHTML=`<div class="card-icon"><i class="${algo.icon}"></i></div><h3>${algo.name}</h3><p>${algo.desc}</p>`;
+            card.addEventListener("click",()=>selectAlgo(card,algo));
+            algoGrid.appendChild(card);
+        }
     });
+    // Hide 'Explore Future' section if nothing upcoming
+    if(!hasUpcoming){
+        const upcomingSection=upcomingGrid.closest(".blueprint-container");
+        if(upcomingSection){upcomingSection.style.display="none";upcomingSection.previousElementSibling.style.display="none";}
+    }
 });
 function selectAlgo(el,algo){
     document.querySelectorAll(".algo-card").forEach(c=>c.classList.remove("selected"));
@@ -104,7 +119,82 @@ function selectAlgo(el,algo){
     selectedAlgo=algo; btnLaunch.disabled=false;
     if(algo.has_shapes||algo.is_custom){extraOptionsGroup.classList.remove("hidden");formSelectGroup.classList.toggle("hidden",!algo.has_shapes);customUploadGroup.classList.toggle("hidden",!algo.is_custom);}
     else extraOptionsGroup.classList.add("hidden");
+
+    // MARL panel visibility
+    const marlPanel=$("marl-panel");
+    if(algo.has_marl){
+        marlPanel.classList.remove("hidden");
+        loadMARLModels();
+    } else {
+        marlPanel.classList.add("hidden");
+    }
 }
+
+// ═══════════════════ MARL TRAINING ═══════════════════
+async function loadMARLModels(){
+    const list=$("marl-model-list");
+    try{
+        const d=await(await fetch("/marl/models")).json();
+        if(!d.models.length){
+            list.innerHTML=`<div class="marl-hint" style="text-align:center;padding:1rem 0;">No trained models yet. Train one to get started!</div>`;
+            return;
+        }
+        list.innerHTML="";
+        d.models.forEach(m=>{
+            const el=document.createElement("div");
+            el.className="marl-model-item";
+            el.innerHTML=`<div><span class="marl-model-name">${m.filename}</span><br><span class="marl-model-meta">${m.drones} drones · ${m.size_mb} MB</span></div><span class="marl-model-badge">READY</span>`;
+            list.appendChild(el);
+        });
+    }catch(e){list.innerHTML=`<div class="marl-hint" style="color:#ef4444;">Failed to load models.</div>`;}
+}
+
+$("btn-marl-train").addEventListener("click",async()=>{
+    const ts=$("marl-timesteps").value;
+    const drones=dronesSlider.value;
+    const btn=$("btn-marl-train");
+    btn.disabled=true; btn.innerHTML=`<i class="fa-solid fa-spinner fa-spin"></i> Training...`;
+    $("marl-train-status").classList.remove("hidden");
+    $("marl-progress-fill").style.width="0%";
+    $("marl-progress-text").textContent="0%";
+
+    try{
+        const fd=new FormData();
+        fd.append("drones",drones);
+        fd.append("timesteps",ts);
+        const r=await(await fetch("/marl/train",{method:"POST",body:fd})).json();
+        if(r.error){alert(r.error);btn.disabled=false;btn.innerHTML=`<i class="fa-solid fa-play"></i> Start Training`;return;}
+
+        // Stream training progress
+        const es=new EventSource(`/stream/${r.job_id}`);
+        es.addEventListener("progress",e=>{
+            const pct=e.data.replace("%","");
+            $("marl-progress-fill").style.width=pct+"%";
+            $("marl-progress-text").textContent=pct+"%";
+        });
+        es.addEventListener("done",()=>{
+            es.close();
+            $("marl-progress-fill").style.width="100%";
+            $("marl-progress-text").textContent="100%";
+            btn.disabled=false;
+            btn.innerHTML=`<i class="fa-solid fa-play"></i> Start Training`;
+            loadMARLModels();
+        });
+        es.onerror=()=>{
+            es.close();
+            btn.disabled=false;
+            btn.innerHTML=`<i class="fa-solid fa-play"></i> Start Training`;
+            $("marl-progress-fill").style.width="100%";
+            $("marl-progress-text").textContent="Done";
+            loadMARLModels();
+        };
+    }catch(e){
+        console.error(e);
+        btn.disabled=false;
+        btn.innerHTML=`<i class="fa-solid fa-play"></i> Start Training`;
+        alert("Failed to start training.");
+    }
+});
 
 // ═══════════════════ LAUNCH ═══════════════════
 btnLaunch.addEventListener("click",async()=>{
