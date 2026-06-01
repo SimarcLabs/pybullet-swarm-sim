@@ -26,13 +26,14 @@ The library is designed to be minimal in setup and maximal in capability — res
 
 | Category | Description |
 |:---|:---|
-| **Environments** | Gymnasium-compatible environments for hover, formation flight, and RL training |
+| **Environments** | Gymnasium-compatible environments for hover, formation flight, single-agent RL, and multi-agent RL |
 | **Agents** | Cascaded PID controller and Stable-Baselines3 RL agent wrapper |
-| **Algorithms** | Reynolds Boids, PSO, ACO, Consensus, Formation Planner |
+| **10 Algorithms** | Boids, PSO, ACO, Consensus, Formation, Hover, APF, Artificial Bee Colony, Voronoi Coverage, MARL (PPO) |
 | **Physics** | Rigid body dynamics, ground effect, aerodynamic drag, rotor downwash |
 | **Telemetry** | Per-step state logging with structured frame capture and NPZ export |
 | **Evaluation** | Benchmark suite with emergence metrics, health scoring, and JSON reports |
-| **Web Dashboard** | FastAPI + Plotly interactive dashboard for simulation control and 3D trajectory review |
+| **Comparison** | Algorithm comparison mode with interactive Plotly radar charts across runs |
+| **Web Dashboard** | FastAPI + Plotly interactive dashboard with scenario presets, run history, and MARL training UI |
 
 ---
 
@@ -97,7 +98,7 @@ env.close()
 
 ## Web Dashboard
 
-The dashboard provides a browser-based interface for configuring simulations, streaming live logs, and reviewing 3D trajectory plots and benchmark metrics — all without writing any code.
+The dashboard provides a browser-based interface for the complete simulation workflow (Configure → Run → Observe → Analyze → Benchmark → Export) — no code required.
 
 **Launch:**
 
@@ -109,11 +110,16 @@ The server starts on `http://127.0.0.1:8000` and the browser opens automatically
 
 **Capabilities:**
 
-- Select algorithm, drone count, and simulation duration via UI controls
+- Select from **10 swarm algorithms** with visual algorithm cards and one-click scenario presets
+- Configure drone count (5–100) and simulation duration via slider controls
 - Stream real-time simulation progress and logs over Server-Sent Events
 - Upload a custom algorithm `.py` file and run it directly against the benchmark suite
+- **Run History Sidebar** — revisit and replay past simulation results
+- **Algorithm Comparison Mode** — select multiple completed runs and generate interactive Plotly radar charts overlaying Coverage, Cohesion, Connectivity, and Safety metrics
+- **MARL Training Panel** — train multi-agent PPO policies directly from the UI with live progress tracking, then deploy them in simulation
 - View interactive 3D trajectory plots (per-drone, color-coded) powered by Plotly
 - Review structured benchmark reports including health score, emergence metrics, and per-algorithm KPIs
+- Export results as JSON, Markdown reports, and telemetry NPZ archives
 
 ---
 
@@ -139,7 +145,7 @@ python -m swarm_sim.examples.flocking --n-drones 12
 python -m swarm_sim.examples.hover_swarm --n-drones 4
 ```
 
-**RL Training — PPO hover policy:**
+**RL Training — PPO hover policy (single-agent):**
 
 ```bash
 pip install pybullet-swarm-sim[rl]
@@ -147,58 +153,62 @@ python -m swarm_sim.examples.rl_hover --train --timesteps 100000
 python -m swarm_sim.examples.rl_hover --play --model-path ppo_hover
 ```
 
+**MARL Training — Multi-agent PPO (parameter-sharing):**
+
+```bash
+python -m swarm_sim.training.marl_train --drones 5 --timesteps 50000
+```
+
 ---
 
 ## Swarm Algorithms
 
-### Reynolds Boids
+All algorithms implement the `BaseAlgorithm` interface and return `(N, 3)` velocity targets via `compute(state)`.
+
+| # | Algorithm | Module | Key Behavior |
+|:--|:----------|:-------|:-------------|
+| 1 | **Reynolds Boids** | `flocking.py` | Separation · Alignment · Cohesion |
+| 2 | **Formation Flight** | `formation.py` | Geometric shapes (Line, V, Grid, Ring, Helix) |
+| 3 | **Hover Swarm** | _via env_ | Fixed-point station keeping |
+| 4 | **PSO Search** | `pso.py` | Particle Swarm Optimization with global best |
+| 5 | **ACO Path Planning** | `aco.py` | Ant Colony pheromone trail waypoints |
+| 6 | **Consensus** | `consensus.py` | Distributed rendezvous & coverage |
+| 7 | **Artificial Potential Fields** | `apf.py` | Goal attraction + obstacle/peer repulsion |
+| 8 | **Artificial Bee Colony** | `abc.py` | Employed / Onlooker / Scout foraging dynamics |
+| 9 | **Voronoi Coverage** | `voronoi_coverage.py` | Lloyd's algorithm for spatial dispersion |
+| 10 | **MARL (PPO)** | `marl.py` | Multi-agent RL with parameter-sharing PPO |
+
+### Usage Examples
 
 ```python
+# Reynolds Boids
 from swarm_sim.algorithms.flocking import FlockingAlgorithm
-
-flock = FlockingAlgorithm(
-    num_drones=10,
-    r_separation=0.3,
-    r_alignment=1.0,
-    r_cohesion=1.5,
-)
+flock = FlockingAlgorithm(num_drones=10, r_separation=0.3)
 velocity_targets = flock.compute(state)
-```
 
-### Particle Swarm Optimization
+# Artificial Potential Fields
+from swarm_sim.algorithms.apf import APFAlgorithm
+apf = APFAlgorithm(num_drones=8, k_att=0.5, k_rep=2.0)
+velocity_targets = apf.compute(state)
 
-```python
+# Voronoi Coverage
+from swarm_sim.algorithms.voronoi_coverage import VoronoiCoverageAlgorithm
+voronoi = VoronoiCoverageAlgorithm(num_drones=12)
+velocity_targets = voronoi.compute(state)
+
+# MARL (with trained model)
+from swarm_sim.algorithms.marl import MARLAlgorithm
+marl = MARLAlgorithm(num_drones=5, model_path="models/marl_ppo_5d.zip")
+velocity_targets = marl.compute(state)
+
+# Particle Swarm Optimization
 from swarm_sim.algorithms.pso import PSOAlgorithm
-
 pso = PSOAlgorithm(num_drones=10, w=0.7, c1=1.5, c2=1.5)
 velocity_targets = pso.compute(state)
-print(f"Global best position: {pso.global_best_position}")
-```
 
-### Ant Colony Optimization
-
-```python
-from swarm_sim.algorithms.aco import ACOPathPlanner
-
-aco = ACOPathPlanner(grid_size=10, num_drones=6)
-next_waypoints = aco.compute(state)
-```
-
-### Distributed Consensus
-
-```python
-from swarm_sim.algorithms.consensus import ConsensusAlgorithm
-
-consensus = ConsensusAlgorithm(mode="rendezvous", gain=0.5)
-velocity_targets = consensus.compute(state)
-```
-
-### Formation Planner
-
-```python
+# Formation Planner
 from swarm_sim.algorithms.formation import FormationPlanner
 from swarm_sim.utils.enums import FormationType
-
 planner = FormationPlanner()
 offsets = planner.compute_offsets(FormationType.HELIX, num_drones=10, spacing=0.5)
 ```
@@ -214,20 +224,27 @@ pybullet-swarm-sim/
 │   │   ├── base_swarm_env.py    # Core: PyBullet physics + multi-drone step loop
 │   │   ├── hover_swarm_env.py   # Fixed-point station keeping
 │   │   ├── formation_env.py     # Moving formation tracking
-│   │   └── rl_swarm_env.py      # Normalized obs/actions for SB3
+│   │   ├── rl_swarm_env.py      # Normalized obs/actions for SB3 (single-agent)
+│   │   └── marl_env.py          # Multi-agent RL env with parameter sharing
 │   ├── agents/                  # Per-drone controllers
 │   │   ├── base_agent.py        # Abstract controller interface
 │   │   ├── pid_agent.py         # Cascaded PID: position → attitude → RPM
 │   │   └── rl_agent.py          # Stable-Baselines3 policy wrapper
-│   ├── algorithms/              # Swarm intelligence
+│   ├── algorithms/              # Swarm intelligence (10 algorithms)
 │   │   ├── flocking.py          # Reynolds Boids
 │   │   ├── formation.py         # Geometric formation planner
 │   │   ├── consensus.py         # Distributed rendezvous and coverage
 │   │   ├── pso.py               # Particle Swarm Optimization
-│   │   └── aco.py               # Ant Colony Optimization
+│   │   ├── aco.py               # Ant Colony Optimization
+│   │   ├── apf.py               # Artificial Potential Fields
+│   │   ├── abc.py               # Artificial Bee Colony
+│   │   ├── voronoi_coverage.py  # Lloyd's algorithm Voronoi tessellation
+│   │   └── marl.py              # Multi-agent RL (PPO inference + heuristic fallback)
+│   ├── training/                # RL training scripts
+│   │   └── marl_train.py        # MARL PPO trainer with dashboard progress streaming
 │   ├── dashboard/               # Web interface
 │   │   ├── __main__.py          # Entry point: launches Uvicorn server
-│   │   ├── server.py            # FastAPI routes, SSE log streaming, Plotly results
+│   │   ├── server.py            # FastAPI routes, SSE streaming, comparison, MARL endpoints
 │   │   ├── runner.py            # Subprocess simulation runner with telemetry
 │   │   └── static/              # Frontend assets (HTML/CSS/JS)
 │   ├── telemetry/               # Structured per-step state logging
@@ -245,6 +262,7 @@ pybullet-swarm-sim/
 │   │   └── state.py             # SwarmState data container
 │   ├── utils/                   # Enumerations, plotting helpers
 │   └── assets/                  # URDF drone models (CF2X, CF2P)
+├── models/                      # Trained RL model checkpoints (.zip)
 ├── tests/                       # Pytest suite
 ├── pyproject.toml
 └── README.md
@@ -259,7 +277,8 @@ pybullet-swarm-sim/
 | `BaseSwarm-v0` | Raw multi-drone physics | Custom controllers |
 | `HoverSwarm-v0` | Hover at fixed target positions | PID baseline, benchmarking |
 | `Formation-v0` | Track a moving geometric formation | Coordination research |
-| `RLSwarm-v0` | Normalized observations and actions | Reinforcement learning |
+| `RLSwarm-v0` | Normalized observations and actions | Single-agent reinforcement learning |
+| `MARLSwarm-v0` | Ego-centric obs, parameter-sharing | Multi-agent reinforcement learning |
 
 ---
 
