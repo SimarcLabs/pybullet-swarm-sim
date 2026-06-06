@@ -6,15 +6,13 @@
   <img src="https://img.shields.io/badge/dashboard-FastAPI-teal?style=flat-square&logo=fastapi" alt="FastAPI Dashboard">
 </p>
 
-<h1 align="center">PyBullet Swarm Sim</h1>
-
 <p align="center">
   <img src="docs/images/pybanner.png" alt="PyBullet Swarm Sim Banner" width="800">
 </p>
 
 <p align="center">
   A modular, physics-accurate Python framework for multi-drone swarm simulation.<br>
-</p>
+</p> 
 
 ---
 
