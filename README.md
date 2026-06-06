@@ -9,6 +9,10 @@
 <h1 align="center">PyBullet Swarm Sim</h1>
 
 <p align="center">
+  <img src="pybanner.png" alt="PyBullet Swarm Sim Banner" width="800">
+</p>
+
+<p align="center">
   A modular, physics-accurate Python framework for multi-drone swarm simulation.<br>
 </p>
 
