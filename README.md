@@ -9,7 +9,7 @@
 <h1 align="center">PyBullet Swarm Sim</h1>
 
 <p align="center">
-  <img src="pybanner.png" alt="PyBullet Swarm Sim Banner" width="800">
+  <img src="docs/images/pybanner.png" alt="PyBullet Swarm Sim Banner" width="800">
 </p>
 
 <p align="center">
