@@ -886,3 +886,298 @@ async def export_manifest(job_id: str):
         return {"error": "Manifest not found"}
     return FileResponse(manifest_path, filename=f"manifest_{job_id}.json",
                         media_type="application/json")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Battle Mode — swarm-vs-swarm combat
+# ─────────────────────────────────────────────────────────────────────────────
+
+BATTLE_ALGOS = [
+    {"id": "flocking", "name": "Reynolds Boids", "icon": "fa-solid fa-crow",
+     "desc": "Separation · Alignment · Cohesion"},
+    {"id": "pso", "name": "PSO Search", "icon": "fa-solid fa-magnifying-glass-chart",
+     "desc": "Particle Swarm Optimization"},
+    {"id": "aco", "name": "ACO Path Planning", "icon": "fa-solid fa-bug",
+     "desc": "Ant Colony pheromone trails"},
+    {"id": "consensus", "name": "Consensus", "icon": "fa-solid fa-network-wired",
+     "desc": "Distributed rendezvous & coverage"},
+    {"id": "abc", "name": "Artificial Bee Colony", "icon": "fa-solid fa-bug-slash",
+     "desc": "Honey bee foraging dynamics"},
+    {"id": "apf", "name": "Potential Fields", "icon": "fa-solid fa-magnet",
+     "desc": "Obstacle repulsion & goal attraction"},
+    {"id": "voronoi", "name": "Voronoi Coverage", "icon": "fa-solid fa-chart-pie",
+     "desc": "Lloyd's algorithm spatial dispersion"},
+    {"id": "marl", "name": "MARL (PPO)", "icon": "fa-solid fa-brain",
+     "desc": "Multi-agent reinforcement learning"},
+]
+
+
+@app.get("/battle/algorithms")
+async def get_battle_algorithms():
+    """Return algorithms available for battle mode."""
+    return BATTLE_ALGOS
+
+
+@app.get("/battle/presets")
+async def get_battle_presets():
+    """Return quick-start battle preset configurations."""
+    return [
+        {
+            "id": "boids_vs_pso",
+            "name": "Boids vs PSO",
+            "desc": "Classic flocking vs particle swarm — cohesion meets convergence",
+            "icon": "fa-solid fa-burst",
+            "algo_alpha": "flocking",
+            "algo_bravo": "pso",
+            "drones_alpha": 10,
+            "drones_bravo": 10,
+            "duration": 20,
+            "color": "#ef4444",
+        },
+        {
+            "id": "formation_vs_consensus",
+            "name": "APF vs Consensus",
+            "desc": "Potential field attraction vs distributed rendezvous",
+            "icon": "fa-solid fa-shield-halved",
+            "algo_alpha": "apf",
+            "algo_bravo": "consensus",
+            "drones_alpha": 8,
+            "drones_bravo": 8,
+            "duration": 15,
+            "color": "#8b5cf6",
+        },
+        {
+            "id": "swarm_rush",
+            "name": "Swarm Rush",
+            "desc": "5 elite Boids vs 15 ABC scouts — quality meets quantity",
+            "icon": "fa-solid fa-people-group",
+            "algo_alpha": "flocking",
+            "algo_bravo": "abc",
+            "drones_alpha": 5,
+            "drones_bravo": 15,
+            "duration": 25,
+            "color": "#f59e0b",
+        },
+        {
+            "id": "ai_vs_swarm",
+            "name": "AI vs Swarm",
+            "desc": "Trained MARL agents vs Voronoi coverage bots",
+            "icon": "fa-solid fa-brain",
+            "algo_alpha": "marl",
+            "algo_bravo": "voronoi",
+            "drones_alpha": 10,
+            "drones_bravo": 10,
+            "duration": 20,
+            "color": "#06b6d4",
+        },
+        {
+            "id": "ant_vs_bee",
+            "name": "Ant vs Bee",
+            "desc": "ACO path planning vs ABC foraging — nature's algorithms clash",
+            "icon": "fa-solid fa-bug",
+            "algo_alpha": "aco",
+            "algo_bravo": "abc",
+            "drones_alpha": 12,
+            "drones_bravo": 12,
+            "duration": 20,
+            "color": "#22c55e",
+        },
+    ]
+
+
+@app.post("/battle/run")
+async def run_battle(
+    algo_alpha: str = Form(...),
+    algo_bravo: str = Form(...),
+    drones_alpha: int = Form(10),
+    drones_bravo: int = Form(10),
+    duration: float = Form(20),
+):
+    """Start a swarm-vs-swarm battle simulation."""
+    job_id = "battle-" + str(uuid.uuid4())[:8]
+
+    runner_path = Path(__file__).parent.parent / "battle" / "runner.py"
+
+    cmd = [
+        sys.executable, str(runner_path),
+        "--algo-alpha", algo_alpha,
+        "--algo-bravo", algo_bravo,
+        "--drones-alpha", str(drones_alpha),
+        "--drones-bravo", str(drones_bravo),
+        "--duration", str(duration),
+        "--job-id", job_id,
+    ]
+
+    process = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+    )
+
+    JOBS[job_id] = {
+        "process": process,
+        "status": "battling",
+    }
+
+    # Log to history
+    history = _load_history()
+    history.insert(0, {
+        "job_id": job_id,
+        "algo": f"{algo_alpha} vs {algo_bravo}",
+        "type": "battle",
+        "algo_alpha": algo_alpha,
+        "algo_bravo": algo_bravo,
+        "drones": drones_alpha + drones_bravo,
+        "drones_alpha": drones_alpha,
+        "drones_bravo": drones_bravo,
+        "duration": duration,
+        "formation_type": "n/a",
+        "timestamp": _time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "status": "battling",
+    })
+    history = history[:50]
+    _save_history(history)
+
+    return {"job_id": job_id}
+
+
+@app.get("/battle/stream/{job_id}")
+async def stream_battle(job_id: str):
+    """Stream live battle events via SSE."""
+    if job_id not in JOBS:
+        return {"error": "Job not found"}
+
+    process = JOBS[job_id]["process"]
+
+    async def battle_generator():
+        while True:
+            line = await asyncio.to_thread(process.stdout.readline)
+            if not line:
+                break
+
+            line = line.strip()
+            if not line:
+                continue
+
+            if line.startswith("PROGRESS:"):
+                pct = line.split(":")[1]
+                yield f"event: progress\ndata: {pct}\n\n"
+            elif line.startswith("BATTLE:"):
+                payload = line[7:]  # strip "BATTLE:" prefix
+                yield f"event: battle\ndata: {payload}\n\n"
+            elif line.startswith("KILL:"):
+                payload = line[5:]  # strip "KILL:" prefix
+                yield f"event: kill\ndata: {payload}\n\n"
+            else:
+                yield f"data: {line}\n\n"
+
+        process.wait()
+        JOBS[job_id]["status"] = "completed"
+
+        # Update history
+        history = _load_history()
+        for entry in history:
+            if entry.get("job_id") == job_id:
+                entry["status"] = "completed"
+                break
+        _save_history(history)
+
+        yield "event: done\ndata: complete\n\n"
+
+    return StreamingResponse(battle_generator(), media_type="text/event-stream")
+
+
+@app.get("/battle/results/{job_id}")
+async def get_battle_results(job_id: str):
+    """Return battle results with Plotly charts."""
+    res_dir = Path("results") / job_id
+    results_path = res_dir / "battle_results.json"
+
+    if not results_path.exists():
+        return {"error": "Battle results not found"}
+
+    with open(results_path, "r") as f:
+        results = json.load(f)
+
+    # --- Build kill timeline chart ---
+    timeline = results.get("timeline", [])
+    if timeline:
+        times = [t["time"] for t in timeline]
+        alpha_kills = [t["alpha_kills"] for t in timeline]
+        bravo_kills = [t["bravo_kills"] for t in timeline]
+
+        fig_kills = go.Figure()
+        fig_kills.add_trace(go.Scatter(
+            x=times, y=alpha_kills, mode='lines', name='Alpha Kills',
+            line=dict(color='#ef4444', width=2),
+            fill='tozeroy', fillcolor='rgba(239,68,68,0.1)',
+        ))
+        fig_kills.add_trace(go.Scatter(
+            x=times, y=bravo_kills, mode='lines', name='Bravo Kills',
+            line=dict(color='#3b82f6', width=2),
+            fill='tozeroy', fillcolor='rgba(59,130,246,0.1)',
+        ))
+        fig_kills.update_layout(
+            **PLOTLY_DARK_LAYOUT, height=300,
+            yaxis_title='Cumulative Kills',
+            xaxis_title='Time (s)',
+        )
+        results["kill_timeline_chart"] = json.loads(fig_kills.to_json())
+
+        # --- Build survival chart ---
+        alpha_alive = [t["alpha_alive"] for t in timeline]
+        bravo_alive = [t["bravo_alive"] for t in timeline]
+
+        fig_surv = go.Figure()
+        fig_surv.add_trace(go.Scatter(
+            x=times, y=alpha_alive, mode='lines', name='Alpha Alive',
+            line=dict(color='#ef4444', width=2),
+            fill='tozeroy', fillcolor='rgba(239,68,68,0.1)',
+        ))
+        fig_surv.add_trace(go.Scatter(
+            x=times, y=bravo_alive, mode='lines', name='Bravo Alive',
+            line=dict(color='#3b82f6', width=2),
+            fill='tozeroy', fillcolor='rgba(59,130,246,0.1)',
+        ))
+        fig_surv.update_layout(
+            **PLOTLY_DARK_LAYOUT, height=300,
+            yaxis_title='Drones Alive',
+            xaxis_title='Time (s)',
+        )
+        results["survival_chart"] = json.loads(fig_surv.to_json())
+
+    # --- Build kill heatmap ---
+    kill_log = results.get("kill_log", [])
+    if kill_log:
+        alpha_kill_x = [k["position"][0] for k in kill_log if k["killer_team"] == "alpha"]
+        alpha_kill_y = [k["position"][1] for k in kill_log if k["killer_team"] == "alpha"]
+        bravo_kill_x = [k["position"][0] for k in kill_log if k["killer_team"] == "bravo"]
+        bravo_kill_y = [k["position"][1] for k in kill_log if k["killer_team"] == "bravo"]
+
+        fig_heatmap = go.Figure()
+        if alpha_kill_x:
+            fig_heatmap.add_trace(go.Scatter(
+                x=alpha_kill_x, y=alpha_kill_y,
+                mode='markers', name='Alpha Kills',
+                marker=dict(color='#ef4444', size=10, symbol='x',
+                            line=dict(width=2, color='#ef4444')),
+            ))
+        if bravo_kill_x:
+            fig_heatmap.add_trace(go.Scatter(
+                x=bravo_kill_x, y=bravo_kill_y,
+                mode='markers', name='Bravo Kills',
+                marker=dict(color='#3b82f6', size=10, symbol='x',
+                            line=dict(width=2, color='#3b82f6')),
+            ))
+        fig_heatmap.update_layout(
+            **PLOTLY_DARK_LAYOUT, height=350,
+            xaxis=dict(range=[-5, 5], gridcolor='#333', zerolinecolor='#444',
+                       color='#888', title='X (m)'),
+            yaxis=dict(range=[-5, 5], gridcolor='#333', zerolinecolor='#444',
+                       color='#888', title='Y (m)', scaleanchor='x'),
+        )
+        results["kill_heatmap_chart"] = json.loads(fig_heatmap.to_json())
+
+    return results

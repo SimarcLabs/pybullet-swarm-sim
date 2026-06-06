@@ -33,6 +33,7 @@ The library is designed to be minimal in setup and maximal in capability — res
 | **Telemetry** | Per-step state logging with structured frame capture and NPZ export |
 | **Evaluation** | Benchmark suite with emergence metrics, health scoring, and JSON reports |
 | **Comparison** | Algorithm comparison mode with interactive Plotly radar charts across runs |
+| **Battle Mode** | Competitive swarm vs swarm simulation with kinetic elimination mechanics and live scoring |
 | **Web Dashboard** | FastAPI + Plotly interactive dashboard with scenario presets, run history, and MARL training UI |
 
 ---
@@ -116,10 +117,31 @@ The server starts on `http://127.0.0.1:8000` and the browser opens automatically
 - Upload a custom algorithm `.py` file and run it directly against the benchmark suite
 - **Run History Sidebar** — revisit and replay past simulation results
 - **Algorithm Comparison Mode** — select multiple completed runs and generate interactive Plotly radar charts overlaying Coverage, Cohesion, Connectivity, and Safety metrics
+- **Battle Mode** — pitch two different algorithms against each other in a kinetic elimination arena with a live scoreboard, kill feed, and post-battle combat analytics
 - **MARL Training Panel** — train multi-agent PPO policies directly from the UI with live progress tracking, then deploy them in simulation
 - View interactive 3D trajectory plots (per-drone, color-coded) powered by Plotly
 - Review structured benchmark reports including health score, emergence metrics, and per-algorithm KPIs
 - Export results as JSON, Markdown reports, and telemetry NPZ archives
+
+---
+
+## Battle Mode
+
+The platform features a competitive **Battle Mode** where two distinct swarm algorithms are pitched against each other in a kinetic elimination arena. 
+
+- **Combat Mechanics:** Eliminations occur via speed-based collisions (kinetic impact). Faster, aggressive drones eliminate slower ones on contact.
+- **Algorithm Integrity:** Algorithms run their native patterns (e.g., Boids charge in formation, PSO converges on the enemy). The runner directs their target vectors toward the opposition.
+- **Live UI:** The dashboard features a real-time 2D arena canvas, live scoreboard, and a streaming kill feed.
+- **Analytics:** Post-battle results include K/D ratios, survival rates, battle intensity, and Plotly charts mapping kills over time.
+
+**Run a headless battle via CLI:**
+
+```bash
+python -m swarm_sim.battle.runner \
+    --algo-alpha flocking --algo-bravo pso \
+    --drones-alpha 10 --drones-bravo 10 \
+    --duration 20 --job-id battle-demo
+```
 
 ---
 

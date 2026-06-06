@@ -397,4 +397,417 @@ function resetToStart(){
     document.querySelectorAll(".workflow-connector").forEach(c=>c.classList.remove("filled"));
 }
 
+// ═══════════════════════════════════════════════════════════════
+// BATTLE MODE
+// ═══════════════════════════════════════════════════════════════
+
+let battleMode = false;
+let battleAlgoAlpha = null, battleAlgoBravo = null;
+let battleJobId = null, battleEventSource = null;
+let battleLastPositions = [];
+
+const ALGO_NAMES = {
+    flocking:"Reynolds Boids", pso:"PSO Search", aco:"ACO Path Planning",
+    consensus:"Consensus", apf:"Potential Fields", abc:"Artificial Bee Colony",
+    voronoi:"Voronoi Coverage", marl:"MARL (PPO)"
+};
+
+// ─── Mode Toggle ───
+$("mode-sim").addEventListener("click",()=>switchMode("sim"));
+$("mode-battle").addEventListener("click",()=>switchMode("battle"));
+
+function switchMode(mode){
+    battleMode = mode === "battle";
+    $("mode-sim").classList.toggle("active", !battleMode);
+    $("mode-battle").classList.toggle("active", battleMode);
+
+    // Hide all panels
+    Object.values(panels).forEach(p=>p.classList.remove("active"));
+    document.querySelectorAll(".battle-panel").forEach(p=>p.classList.remove("active"));
+
+    // Show/hide workflow bar
+    document.querySelector(".workflow-bar").style.display = battleMode ? "none" : "flex";
+
+    if(battleMode){
+        $("panel-battle-configure").classList.add("active");
+    } else {
+        navigateTo("configure");
+    }
+}
+
+// ─── Battle Sliders ───
+const baDronesSlider = $("ba-drones-slider"), baDronesVal = $("ba-drones-val");
+const bbDronesSlider = $("bb-drones-slider"), bbDronesVal = $("bb-drones-val");
+const battleDurSlider = $("battle-duration-slider"), battleDurVal = $("battle-duration-val");
+
+baDronesSlider.addEventListener("input",()=>baDronesVal.textContent=baDronesSlider.value);
+bbDronesSlider.addEventListener("input",()=>bbDronesVal.textContent=bbDronesSlider.value);
+battleDurSlider.addEventListener("input",()=>battleDurVal.textContent=battleDurSlider.value);
+
+$("btn-ba-drone-minus").addEventListener("click",()=>{baDronesSlider.value=Math.max(+baDronesSlider.min,+baDronesSlider.value-1);baDronesVal.textContent=baDronesSlider.value;});
+$("btn-ba-drone-plus").addEventListener("click",()=>{baDronesSlider.value=Math.min(+baDronesSlider.max,+baDronesSlider.value+1);baDronesVal.textContent=baDronesSlider.value;});
+$("btn-bb-drone-minus").addEventListener("click",()=>{bbDronesSlider.value=Math.max(+bbDronesSlider.min,+bbDronesSlider.value-1);bbDronesVal.textContent=bbDronesSlider.value;});
+$("btn-bb-drone-plus").addEventListener("click",()=>{bbDronesSlider.value=Math.min(+bbDronesSlider.max,+bbDronesSlider.value+1);bbDronesVal.textContent=bbDronesSlider.value;});
+$("btn-battle-time-minus").addEventListener("click",()=>{battleDurSlider.value=Math.max(+battleDurSlider.min,+battleDurSlider.value-+battleDurSlider.step);battleDurVal.textContent=battleDurSlider.value;});
+$("btn-battle-time-plus").addEventListener("click",()=>{battleDurSlider.value=Math.min(+battleDurSlider.max,+battleDurSlider.value+ +battleDurSlider.step);battleDurVal.textContent=battleDurSlider.value;});
+
+function checkBattleLaunchReady(){
+    $("btn-battle-launch").disabled = !(battleAlgoAlpha && battleAlgoBravo);
+}
+
+// ─── Battle Algorithm Selection ───
+fetch("/battle/algorithms").then(r=>r.json()).then(algos=>{
+    ["alpha","bravo"].forEach(team=>{
+        const grid = $(`battle-algo-grid-${team}`);
+        algos.forEach(algo=>{
+            const card = document.createElement("div");
+            card.className = "battle-algo-card";
+            card.dataset.algoId = algo.id;
+            card.innerHTML = `<i class="${algo.icon}"></i><div class="battle-algo-name">${algo.name}</div>`;
+            card.addEventListener("click",()=>{
+                grid.querySelectorAll(".battle-algo-card").forEach(c=>c.classList.remove("selected"));
+                card.classList.add("selected");
+                if(team==="alpha") battleAlgoAlpha = algo.id;
+                else battleAlgoBravo = algo.id;
+                checkBattleLaunchReady();
+            });
+            grid.appendChild(card);
+        });
+    });
 });
+
+// ─── Battle Presets ───
+fetch("/battle/presets").then(r=>r.json()).then(presets=>{
+    const grid = $("battle-preset-grid");
+    presets.forEach(p=>{
+        const card = document.createElement("div");
+        card.className = "preset-card";
+        card.innerHTML = `
+            <div class="preset-icon" style="background:${p.color}15;color:${p.color}"><i class="${p.icon}"></i></div>
+            <div class="preset-info">
+                <h4>${p.name}</h4>
+                <p>${p.desc}</p>
+                <div class="preset-meta">
+                    <span class="preset-tag">${p.drones_alpha}v${p.drones_bravo}</span>
+                    <span class="preset-tag">${p.duration}s</span>
+                </div>
+            </div>`;
+        card.addEventListener("click",()=>launchBattlePreset(p));
+        grid.appendChild(card);
+    });
+});
+
+function launchBattlePreset(p){
+    switchMode("battle");
+    baDronesSlider.value = p.drones_alpha; baDronesVal.textContent = p.drones_alpha;
+    bbDronesSlider.value = p.drones_bravo; bbDronesVal.textContent = p.drones_bravo;
+    battleDurSlider.value = p.duration; battleDurVal.textContent = p.duration;
+    battleAlgoAlpha = p.algo_alpha;
+    battleAlgoBravo = p.algo_bravo;
+
+    // Select the algo cards visually
+    document.querySelectorAll("#battle-algo-grid-alpha .battle-algo-card").forEach(c=>{
+        c.classList.toggle("selected", c.dataset.algoId === p.algo_alpha);
+    });
+    document.querySelectorAll("#battle-algo-grid-bravo .battle-algo-card").forEach(c=>{
+        c.classList.toggle("selected", c.dataset.algoId === p.algo_bravo);
+    });
+
+    checkBattleLaunchReady();
+    setTimeout(()=>$("btn-battle-launch").click(), 200);
+}
+
+// ─── Battle Launch ───
+$("btn-battle-launch").addEventListener("click", async()=>{
+    if(!battleAlgoAlpha || !battleAlgoBravo) return;
+
+    const fd = new FormData();
+    fd.append("algo_alpha", battleAlgoAlpha);
+    fd.append("algo_bravo", battleAlgoBravo);
+    fd.append("drones_alpha", baDronesSlider.value);
+    fd.append("drones_bravo", bbDronesSlider.value);
+    fd.append("duration", battleDurSlider.value);
+
+    $("btn-battle-launch").disabled = true;
+    $("battle-terminal-container").classList.remove("hidden");
+    $("battle-terminal-output").innerHTML = "";
+    $("battle-terminal-badge").textContent = "BATTLING";
+
+    try {
+        const r = await fetch("/battle/run", {method:"POST", body:fd});
+        const d = await r.json();
+        battleJobId = d.job_id;
+
+        // Initialize live view
+        $("live-algo-alpha").textContent = (ALGO_NAMES[battleAlgoAlpha]||battleAlgoAlpha).toUpperCase();
+        $("live-algo-bravo").textContent = (ALGO_NAMES[battleAlgoBravo]||battleAlgoBravo).toUpperCase();
+        $("live-alpha-total").textContent = baDronesSlider.value;
+        $("live-bravo-total").textContent = bbDronesSlider.value;
+        $("live-alpha-alive").textContent = baDronesSlider.value;
+        $("live-bravo-alive").textContent = bbDronesSlider.value;
+        $("live-alpha-kills").textContent = "0";
+        $("live-bravo-kills").textContent = "0";
+        $("kill-feed").innerHTML = '<div class="kill-feed-empty">Waiting for action...</div>';
+
+        // Switch to live panel
+        document.querySelectorAll(".battle-panel").forEach(p=>p.classList.remove("active"));
+        $("panel-battle-live").classList.add("active");
+
+        streamBattle(d.job_id);
+    } catch(e) {
+        console.error(e);
+        $("btn-battle-launch").disabled = false;
+        alert("Failed to start battle.");
+    }
+});
+
+// ─── Battle SSE Stream ───
+function streamBattle(jobId){
+    battleEventSource = new EventSource(`/battle/stream/${jobId}`);
+
+    battleEventSource.onmessage = e => {
+        const termOut = $("battle-terminal-output");
+        const l = document.createElement("div");
+        l.textContent = `> ${e.data}`;
+        termOut.appendChild(l);
+        termOut.scrollTop = termOut.scrollHeight;
+    };
+
+    battleEventSource.addEventListener("progress", e => {
+        $("battle-progress-text").textContent = e.data.replace("%","") + "%";
+    });
+
+    battleEventSource.addEventListener("battle", e => {
+        try {
+            const d = JSON.parse(e.data);
+            $("live-alpha-alive").textContent = d.alpha_alive;
+            $("live-bravo-alive").textContent = d.bravo_alive;
+            $("live-alpha-kills").textContent = d.alpha_kills;
+            $("live-bravo-kills").textContent = d.bravo_kills;
+
+            // Update timer
+            if(d.time !== undefined){
+                const m = Math.floor(d.time/60);
+                const s = Math.floor(d.time%60);
+                $("battle-timer").textContent = `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+            }
+
+            // Store positions for canvas
+            if(d.positions) {
+                battleLastPositions = d.positions;
+                drawBattleArena(d.positions);
+            }
+        } catch(err) { console.error("Battle parse error:", err); }
+    });
+
+    battleEventSource.addEventListener("kill", e => {
+        try {
+            const k = JSON.parse(e.data);
+            const feed = $("kill-feed");
+            // Remove empty message
+            const empty = feed.querySelector(".kill-feed-empty");
+            if(empty) empty.remove();
+
+            const item = document.createElement("div");
+            item.className = "kill-feed-item";
+            item.innerHTML = `
+                <span class="kill-time">${k.time.toFixed(1)}s</span>
+                <span class="kill-team-tag ${k.killer_team}">${k.killer_team.toUpperCase()}</span>
+                <span class="kill-text">Drone #${k.killer} eliminated Drone #${k.victim}</span>
+                <span class="kill-team-tag ${k.victim_team}">${k.victim_team.toUpperCase()}</span>
+            `;
+            feed.insertBefore(item, feed.firstChild);
+            feed.scrollTop = 0;
+        } catch(err) { console.error("Kill parse error:", err); }
+    });
+
+    battleEventSource.addEventListener("done", () => {
+        battleEventSource.close();
+        $("battle-terminal-badge").textContent = "DONE";
+        $("battle-terminal-badge").style.background = "rgba(34,197,94,0.15)";
+        $("battle-terminal-badge").style.color = "#22c55e";
+
+        // Load results after short delay
+        setTimeout(()=>loadBattleResults(jobId), 1500);
+    });
+
+    battleEventSource.onerror = () => {
+        battleEventSource.close();
+        $("btn-battle-launch").disabled = false;
+        // May also mean battle is done
+        setTimeout(()=>loadBattleResults(jobId), 1000);
+    };
+}
+
+// ─── Battle Arena Canvas ───
+function drawBattleArena(positions){
+    const canvas = $("battle-canvas"), ctx = canvas.getContext("2d");
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * devicePixelRatio;
+    canvas.height = rect.height * devicePixelRatio;
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+    const W = rect.width, H = rect.height;
+
+    // Background
+    ctx.fillStyle = "#0a0a0a";
+    ctx.fillRect(0, 0, W, H);
+
+    // Grid
+    ctx.strokeStyle = "#1a1a1a";
+    ctx.lineWidth = 1;
+    for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+    // Center line
+    ctx.strokeStyle = "#2a2a2a";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5,5]);
+    ctx.beginPath(); ctx.moveTo(W/2,0); ctx.lineTo(W/2,H); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Coordinate mapping — arena is -5 to 5 on both axes
+    const mx = v => ((v + 5) / 10) * (W - 40) + 20;
+    const my = v => H - (((v + 5) / 10) * (H - 40) + 20);
+
+    // Draw connection lines within teams
+    const alphas = positions.filter(p=>p.team==="alpha");
+    const bravos = positions.filter(p=>p.team==="bravo");
+
+    function drawTeamLinks(teamDrones, color){
+        for(let i=0;i<teamDrones.length;i++){
+            for(let j=i+1;j<teamDrones.length;j++){
+                const dx=teamDrones[i].x-teamDrones[j].x, dy=teamDrones[i].y-teamDrones[j].y;
+                const d=Math.sqrt(dx*dx+dy*dy);
+                if(d<2){
+                    ctx.strokeStyle=color.replace("1)",`${Math.max(0,1-d/2)*0.2})`);
+                    ctx.lineWidth=1;
+                    ctx.beginPath();
+                    ctx.moveTo(mx(teamDrones[i].x),my(teamDrones[i].y));
+                    ctx.lineTo(mx(teamDrones[j].x),my(teamDrones[j].y));
+                    ctx.stroke();
+                }
+            }
+        }
+    }
+
+    drawTeamLinks(alphas, "rgba(239,68,68,1)");
+    drawTeamLinks(bravos, "rgba(59,130,246,1)");
+
+    // Draw drones
+    positions.forEach(p=>{
+        const px = mx(p.x), py = my(p.y);
+        const isAlpha = p.team === "alpha";
+        const color = isAlpha ? "#ef4444" : "#3b82f6";
+
+        // Glow
+        const g = ctx.createRadialGradient(px,py,0,px,py,14);
+        g.addColorStop(0, color+"55");
+        g.addColorStop(1, color+"00");
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(px,py,14,0,Math.PI*2); ctx.fill();
+
+        // Core
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(px,py,4,0,Math.PI*2); ctx.fill();
+    });
+
+    // Draw team labels
+    ctx.fillStyle = "rgba(239,68,68,0.4)";
+    ctx.font = "bold 10px 'Orbitron', monospace";
+    ctx.fillText("ALPHA", 10, 18);
+
+    ctx.fillStyle = "rgba(59,130,246,0.4)";
+    ctx.textAlign = "right";
+    ctx.fillText("BRAVO", W-10, 18);
+    ctx.textAlign = "left";
+}
+
+// ─── Load Battle Results ───
+async function loadBattleResults(jobId){
+    try{
+        const d = await(await fetch(`/battle/results/${jobId}`)).json();
+        if(d.error){ console.log("Results not ready yet."); return; }
+
+        // Switch to results panel
+        document.querySelectorAll(".battle-panel").forEach(p=>p.classList.remove("active"));
+        $("panel-battle-results").classList.add("active");
+
+        // Winner banner
+        const banner = $("winner-banner");
+        banner.className = "winner-banner";
+        if(d.winner === "alpha"){
+            banner.classList.add("alpha-winner");
+            $("winner-name").textContent = `TEAM ALPHA · ${(ALGO_NAMES[d.algo_alpha]||d.algo_alpha).toUpperCase()}`;
+            $("winner-name").style.color = "#ef4444";
+        } else if(d.winner === "bravo"){
+            banner.classList.add("bravo-winner");
+            $("winner-name").textContent = `TEAM BRAVO · ${(ALGO_NAMES[d.algo_bravo]||d.algo_bravo).toUpperCase()}`;
+            $("winner-name").style.color = "#3b82f6";
+        } else {
+            banner.classList.add("draw-result");
+            $("winner-name").textContent = "DRAW";
+            $("winner-name").style.color = "#9ca3af";
+        }
+
+        // Team stats
+        $("result-algo-alpha").textContent = (ALGO_NAMES[d.algo_alpha]||d.algo_alpha).toUpperCase();
+        $("result-algo-bravo").textContent = (ALGO_NAMES[d.algo_bravo]||d.algo_bravo).toUpperCase();
+
+        $("r-alpha-survivors").textContent = `${d.alpha.survivors} / ${d.alpha.initial}`;
+        $("r-alpha-kills").textContent = d.alpha.kills;
+        $("r-alpha-kd").textContent = d.alpha.kd_ratio;
+        $("r-alpha-survival").textContent = `${d.alpha.survival_rate}%`;
+        $("r-alpha-efficiency").textContent = `${d.alpha.efficiency}%`;
+
+        $("r-bravo-survivors").textContent = `${d.bravo.survivors} / ${d.bravo.initial}`;
+        $("r-bravo-kills").textContent = d.bravo.kills;
+        $("r-bravo-kd").textContent = d.bravo.kd_ratio;
+        $("r-bravo-survival").textContent = `${d.bravo.survival_rate}%`;
+        $("r-bravo-efficiency").textContent = `${d.bravo.efficiency}%`;
+
+        // Summary stats
+        $("r-duration").textContent = `${d.duration}s`;
+        $("r-first-blood").textContent = d.first_blood.team ? `${d.first_blood.team.toUpperCase()} @ ${d.first_blood.time}s` : "N/A";
+        $("r-intensity").textContent = `${d.battle_intensity} kills/s`;
+        $("r-total-kills").textContent = d.alpha.kills + d.bravo.kills;
+
+        // Plotly charts
+        const pc = {responsive:true, displayModeBar:false};
+        if(d.kill_timeline_chart){
+            Plotly.newPlot("chart-kill-timeline", d.kill_timeline_chart.data, d.kill_timeline_chart.layout, pc);
+        }
+        if(d.survival_chart){
+            Plotly.newPlot("chart-survival", d.survival_chart.data, d.survival_chart.layout, pc);
+        }
+        if(d.kill_heatmap_chart){
+            Plotly.newPlot("chart-kill-heatmap", d.kill_heatmap_chart.data, d.kill_heatmap_chart.layout, pc);
+        }
+    } catch(e){ console.error("Failed to load battle results:", e); }
+}
+
+// ─── Rematch / New Battle ───
+$("btn-battle-rematch").addEventListener("click",()=>{
+    document.querySelectorAll(".battle-panel").forEach(p=>p.classList.remove("active"));
+    $("panel-battle-configure").classList.add("active");
+    $("btn-battle-launch").disabled = false;
+    // Keep the same config, just re-enable launch
+    checkBattleLaunchReady();
+    setTimeout(()=>$("btn-battle-launch").click(), 200);
+});
+
+$("btn-battle-new").addEventListener("click",()=>{
+    document.querySelectorAll(".battle-panel").forEach(p=>p.classList.remove("active"));
+    $("panel-battle-configure").classList.add("active");
+    $("btn-battle-launch").disabled = true;
+    battleAlgoAlpha = null;
+    battleAlgoBravo = null;
+    document.querySelectorAll(".battle-algo-card").forEach(c=>c.classList.remove("selected"));
+    $("battle-terminal-container").classList.add("hidden");
+    $("battle-terminal-badge").textContent = "BATTLING";
+    $("battle-terminal-badge").style.background = "";
+    $("battle-terminal-badge").style.color = "";
+    ["chart-kill-timeline","chart-survival","chart-kill-heatmap"].forEach(id=>{const el=$(id);if(el)Plotly.purge(el);});
+});
+
+});
+

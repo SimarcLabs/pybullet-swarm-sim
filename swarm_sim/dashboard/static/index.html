@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
-    <link rel="stylesheet" href="/static/style.css?v=8">
+    <link rel="stylesheet" href="/static/style.css?v=9">
 </head>
 
 <body>
@@ -17,6 +17,16 @@
         <div class="logo">
             <img src="/assets/logo_sim.png" width="40" height="40" alt="Logo">
             <span>PyBullet Swarm Sim</span>
+        </div>
+        <div class="nav-center">
+            <div class="mode-toggle" id="mode-toggle">
+                <button class="mode-btn active" data-mode="sim" id="mode-sim">
+                    <i class="fa-solid fa-play"></i> Simulation
+                </button>
+                <button class="mode-btn" data-mode="battle" id="mode-battle">
+                    <i class="fa-solid fa-crosshairs"></i> Battle Mode
+                </button>
+            </div>
         </div>
         <div class="nav-right">
             <button class="btn-ghost" id="btn-toggle-history">
@@ -521,9 +531,294 @@
             </div>
         </section>
 
+        <!-- ═══════════════════ BATTLE MODE PANELS ═══════════════════ -->
+
+        <!-- BATTLE: Configure -->
+        <section id="panel-battle-configure" class="panel battle-panel">
+            <div class="hero">
+                <h1><i class="fa-solid fa-crosshairs" style="color:#ef4444;"></i> Battle Mode</h1>
+                <p>Pit two swarm algorithms against each other in kinetic combat. Choose your teams and watch them fight.</p>
+            </div>
+
+            <!-- Battle Presets -->
+            <div class="presets-section">
+                <div class="section-label">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>Quick Battles</span>
+                    <div class="section-line"></div>
+                </div>
+                <div class="preset-grid" id="battle-preset-grid">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- Team Configuration -->
+            <div class="section-label" style="margin-top:2rem;">
+                <i class="fa-solid fa-users"></i>
+                <span>Team Configuration</span>
+                <div class="section-line"></div>
+            </div>
+
+            <div class="battle-teams-grid">
+                <!-- Team Alpha -->
+                <div class="team-card team-alpha">
+                    <div class="team-header">
+                        <div class="team-badge alpha">α</div>
+                        <h3>Team Alpha</h3>
+                    </div>
+                    <div class="team-body">
+                        <label class="team-field-label">Algorithm</label>
+                        <div class="battle-algo-grid" id="battle-algo-grid-alpha">
+                            <!-- Populated via JS -->
+                        </div>
+                        <label class="team-field-label" style="margin-top:1rem;">Drones</label>
+                        <div class="slider-control">
+                            <button class="btn-ctrl" id="btn-ba-drone-minus">-</button>
+                            <span id="ba-drones-val" class="val-display">10</span>
+                            <button class="btn-ctrl" id="btn-ba-drone-plus">+</button>
+                        </div>
+                        <div class="slider-track-container">
+                            <span class="range-label">3</span>
+                            <input type="range" id="ba-drones-slider" min="3" max="50" value="10">
+                            <span class="range-label">50</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VS Divider -->
+                <div class="vs-divider">
+                    <span>VS</span>
+                </div>
+
+                <!-- Team Bravo -->
+                <div class="team-card team-bravo">
+                    <div class="team-header">
+                        <div class="team-badge bravo">β</div>
+                        <h3>Team Bravo</h3>
+                    </div>
+                    <div class="team-body">
+                        <label class="team-field-label">Algorithm</label>
+                        <div class="battle-algo-grid" id="battle-algo-grid-bravo">
+                            <!-- Populated via JS -->
+                        </div>
+                        <label class="team-field-label" style="margin-top:1rem;">Drones</label>
+                        <div class="slider-control">
+                            <button class="btn-ctrl" id="btn-bb-drone-minus">-</button>
+                            <span id="bb-drones-val" class="val-display">10</span>
+                            <button class="btn-ctrl" id="btn-bb-drone-plus">+</button>
+                        </div>
+                        <div class="slider-track-container">
+                            <span class="range-label">3</span>
+                            <input type="range" id="bb-drones-slider" min="3" max="50" value="10">
+                            <span class="range-label">50</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Battle Duration -->
+            <div class="config-grid" style="margin-top:1.5rem;">
+                <div class="config-col">
+                    <div class="config-header">Battle Duration (sec)</div>
+                    <div class="config-body">
+                        <div class="slider-control">
+                            <button id="btn-battle-time-minus" class="btn-ctrl">-</button>
+                            <span id="battle-duration-val" class="val-display">20</span>
+                            <button id="btn-battle-time-plus" class="btn-ctrl">+</button>
+                        </div>
+                        <div class="slider-track-container">
+                            <span class="range-label">10</span>
+                            <input type="range" id="battle-duration-slider" min="10" max="60" step="5" value="20">
+                            <span class="range-label">60</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Launch Button -->
+            <div class="overview-panel" style="margin-top:1.5rem;">
+                <div class="overview-body" style="justify-content:center;">
+                    <div class="btn-container">
+                        <button id="btn-battle-launch" class="btn-primary btn-battle" disabled>
+                            <i class="fa-solid fa-crosshairs"></i> START BATTLE
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Battle Terminal -->
+            <div class="terminal hidden" id="battle-terminal-container">
+                <div class="terminal-header">
+                    <span><i class="fa-solid fa-terminal"></i> Battle Output</span>
+                    <span class="terminal-badge" id="battle-terminal-badge">BATTLING</span>
+                </div>
+                <div class="terminal-body" id="battle-terminal-output"></div>
+            </div>
+        </section>
+
+        <!-- BATTLE: Live View -->
+        <section id="panel-battle-live" class="panel battle-panel">
+            <div class="panel-header-bar">
+                <div class="panel-title">
+                    <i class="fa-solid fa-crosshairs" style="color:#ef4444;"></i>
+                    <h2>Live Battle</h2>
+                </div>
+                <div class="panel-actions">
+                    <span class="battle-timer" id="battle-timer">00:00</span>
+                </div>
+            </div>
+
+            <!-- Scoreboard -->
+            <div class="battle-scoreboard">
+                <div class="score-team alpha">
+                    <div class="score-team-name">ALPHA</div>
+                    <div class="score-algo" id="live-algo-alpha">--</div>
+                    <div class="score-alive">
+                        <span class="score-big" id="live-alpha-alive">0</span>
+                        <span class="score-total">/ <span id="live-alpha-total">0</span></span>
+                    </div>
+                    <div class="score-label">ALIVE</div>
+                    <div class="score-kills"><i class="fa-solid fa-skull"></i> <span id="live-alpha-kills">0</span> kills</div>
+                </div>
+                <div class="score-vs">VS</div>
+                <div class="score-team bravo">
+                    <div class="score-team-name">BRAVO</div>
+                    <div class="score-algo" id="live-algo-bravo">--</div>
+                    <div class="score-alive">
+                        <span class="score-big" id="live-bravo-alive">0</span>
+                        <span class="score-total">/ <span id="live-bravo-total">0</span></span>
+                    </div>
+                    <div class="score-label">ALIVE</div>
+                    <div class="score-kills"><i class="fa-solid fa-skull"></i> <span id="live-bravo-kills">0</span> kills</div>
+                </div>
+            </div>
+
+            <!-- Battle Arena Canvas -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3><i class="fa-solid fa-map"></i> Battle Arena</h3>
+                    <div class="battle-progress-mini">
+                        <span id="battle-progress-text">0%</span>
+                    </div>
+                </div>
+                <canvas id="battle-canvas" width="900" height="500"></canvas>
+            </div>
+
+            <!-- Kill Feed -->
+            <div class="chart-card" style="margin-top:1.5rem;">
+                <div class="chart-header">
+                    <h3><i class="fa-solid fa-skull-crossbones"></i> Kill Feed</h3>
+                </div>
+                <div class="kill-feed" id="kill-feed">
+                    <div class="kill-feed-empty">Waiting for action...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BATTLE: Results -->
+        <section id="panel-battle-results" class="panel battle-panel">
+            <div class="panel-header-bar">
+                <div class="panel-title">
+                    <i class="fa-solid fa-trophy" style="color:#f59e0b;"></i>
+                    <h2>Battle Results</h2>
+                </div>
+                <div class="panel-actions">
+                    <button class="btn-secondary" id="btn-battle-rematch">
+                        <i class="fa-solid fa-rotate-left"></i> Rematch
+                    </button>
+                    <button class="btn-primary" id="btn-battle-new">
+                        <i class="fa-solid fa-plus"></i> New Battle
+                    </button>
+                </div>
+            </div>
+
+            <!-- Winner Banner -->
+            <div class="winner-banner" id="winner-banner">
+                <div class="winner-icon"><i class="fa-solid fa-trophy"></i></div>
+                <div class="winner-text">
+                    <span class="winner-label">WINNER</span>
+                    <span class="winner-name" id="winner-name">--</span>
+                </div>
+            </div>
+
+            <!-- Results Scoreboard -->
+            <div class="battle-results-grid">
+                <div class="result-team-card alpha">
+                    <h3>Team Alpha</h3>
+                    <div class="result-algo" id="result-algo-alpha">--</div>
+                    <div class="result-stats">
+                        <div class="result-stat"><span class="result-stat-label">Survivors</span><span class="result-stat-value" id="r-alpha-survivors">--</span></div>
+                        <div class="result-stat"><span class="result-stat-label">Kills</span><span class="result-stat-value" id="r-alpha-kills">--</span></div>
+                        <div class="result-stat"><span class="result-stat-label">K/D Ratio</span><span class="result-stat-value" id="r-alpha-kd">--</span></div>
+                        <div class="result-stat"><span class="result-stat-label">Survival Rate</span><span class="result-stat-value" id="r-alpha-survival">--</span></div>
+                        <div class="result-stat"><span class="result-stat-label">Efficiency</span><span class="result-stat-value" id="r-alpha-efficiency">--</span></div>
+                    </div>
+                </div>
+                <div class="result-team-card bravo">
+                    <h3>Team Bravo</h3>
+                    <div class="result-algo" id="result-algo-bravo">--</div>
+                    <div class="result-stats">
+                        <div class="result-stat"><span class="result-stat-label">Survivors</span><span class="result-stat-value" id="r-bravo-survivors">--</span></div>
+                        <div class="result-stat"><span class="result-stat-label">Kills</span><span class="result-stat-value" id="r-bravo-kills">--</span></div>
+                        <div class="result-stat"><span class="result-stat-label">K/D Ratio</span><span class="result-stat-value" id="r-bravo-kd">--</span></div>
+                        <div class="result-stat"><span class="result-stat-label">Survival Rate</span><span class="result-stat-value" id="r-bravo-survival">--</span></div>
+                        <div class="result-stat"><span class="result-stat-label">Efficiency</span><span class="result-stat-value" id="r-bravo-efficiency">--</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Battle Summary Stats -->
+            <div class="stats-row four-col" style="margin-top:1.5rem;">
+                <div class="stat-card">
+                    <div class="stat-icon" style="color:#f59e0b;"><i class="fa-solid fa-clock"></i></div>
+                    <div class="stat-details">
+                        <span class="stat-label">Duration</span>
+                        <span class="stat-value" id="r-duration">--</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="color:#ef4444;"><i class="fa-solid fa-skull"></i></div>
+                    <div class="stat-details">
+                        <span class="stat-label">First Blood</span>
+                        <span class="stat-value" id="r-first-blood">--</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="color:#8b5cf6;"><i class="fa-solid fa-fire"></i></div>
+                    <div class="stat-details">
+                        <span class="stat-label">Intensity</span>
+                        <span class="stat-value" id="r-intensity">--</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="color:#22c55e;"><i class="fa-solid fa-skull-crossbones"></i></div>
+                    <div class="stat-details">
+                        <span class="stat-label">Total Kills</span>
+                        <span class="stat-value" id="r-total-kills">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="analysis-grid" style="margin-top:1.5rem;">
+                <div class="chart-card">
+                    <div class="chart-header"><h3><i class="fa-solid fa-skull"></i> Kill Timeline</h3></div>
+                    <div id="chart-kill-timeline" class="plotly-div short"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><h3><i class="fa-solid fa-heart-pulse"></i> Drone Survival</h3></div>
+                    <div id="chart-survival" class="plotly-div short"></div>
+                </div>
+                <div class="chart-card full-width">
+                    <div class="chart-header"><h3><i class="fa-solid fa-map-location-dot"></i> Kill Locations</h3></div>
+                    <div id="chart-kill-heatmap" class="plotly-div" style="height:350px;"></div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
-    <script src="/static/app.js?v=8"></script>
+    <script src="/static/app.js?v=9"></script>
 </body>
 
 </html>
