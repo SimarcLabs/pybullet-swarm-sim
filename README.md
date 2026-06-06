@@ -263,6 +263,9 @@ pybullet-swarm-sim/
 │   │   ├── abc.py               # Artificial Bee Colony
 │   │   ├── voronoi_coverage.py  # Lloyd's algorithm Voronoi tessellation
 │   │   └── marl.py              # Multi-agent RL (PPO inference + heuristic fallback)
+│   ├── battle/                  # Competitive multi-team simulation
+│   │   ├── runner.py            # Battle mode orchestrator and physics loop
+│   │   └── scoring.py           # Kinetic elimination logic and live metrics
 │   ├── training/                # RL training scripts
 │   │   └── marl_train.py        # MARL PPO trainer with dashboard progress streaming
 │   ├── dashboard/               # Web interface
