@@ -9,7 +9,7 @@
 <h1 align="center">PyBullet Swarm Sim</h1>
 
 <p align="center">
-  A modular, physics-accurate Python library for multi-drone swarm simulation.<br>
+  A modular, physics-accurate Python framework for multi-drone swarm simulation.<br>
 </p>
 
 ---
@@ -17,8 +17,7 @@
 ## Overview
 
 PyBullet Swarm Sim provides a full-stack environment for simulating and evaluating multi-drone swarm behavior. It combines rigid-body physics simulation via PyBullet, Gymnasium-compatible environments, a suite of classical swarm intelligence algorithms, and a real-time web dashboard for interactive benchmarking and trajectory visualization.
-
-The library is designed to be minimal in setup and maximal in capability — researchers can go from installation to a running swarm in minutes, while the architecture supports extension to custom physics models, algorithms, and RL policies.
+The framework is designed to be minimal in setup and maximal in capability — researchers can go from installation to a running swarm in minutes, while the architecture supports extension to custom physics models, algorithms, and RL policies.
 
 ---
 
