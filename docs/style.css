@@ -1,19 +1,41 @@
-:root{--bg:#0f1724;--card:#0b1220;--muted:#9aa7b2;--accent:#2dd4bf;--text:#e6eef6}
+:root{
+	--bg: #071022;        /* page background */
+	--panel: #0b1220;     /* side / content panels */
+	--muted: #8b99a6;     /* secondary text */
+	--accent: #2dd4bf;    /* accent */
+	--text: #e6eef6;      /* main text */
+}
+
 *{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:#f6f8fb;color:#0b1220}
+body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
 .container{max-width:1000px;margin:0 auto;padding:16px}
-.topbar{background:#ffffff;border-bottom:1px solid #e6eef6;padding:18px 0}
-.topbar h1{margin:0;font-size:20px}
-.topbar .tag{margin:6px 0 0;color:#6b7280}
+.topbar{position:sticky;top:0;z-index:1200;background:linear-gradient(180deg, rgba(7,16,34,0.98), rgba(7,16,34,0.95));backdrop-filter:blur(6px);padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+.topbar .container{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.topbar h1{margin:0;font-size:18px;color:var(--text);line-height:1}
+.topbar .tag{margin:0;color:var(--muted);font-size:12px}
+
+.github-star{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.03);color:var(--text);text-decoration:none;border:1px solid rgba(255,255,255,0.02)}
+.github-star svg{width:16px;height:16px;fill:var(--text)}
+.github-star:hover{background:rgba(255,255,255,0.04)}
+.topbar .logo{width:36px;height:auto;border-radius:6px;margin-right:10px}
 .layout{display:grid;grid-template-columns:260px 1fr;gap:20px;padding:18px 0}
-.sidebar{background:#fff;border:1px solid #eaeef5;padding:18px;border-radius:8px}
-.sidebar .banner{width:100%;height:auto;border-radius:6px;margin-bottom:12px}
+.sidebar{background:var(--panel);padding:18px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+.sidebar .banner{width:100%;height:auto;border-radius:6px;margin-bottom:12px;display:block}
+.page-banner{width:100%;height:auto;border-radius:8px;margin-bottom:18px;border:1px solid rgba(255,255,255,0.03)}
+.sidebar h4{margin:8px 0 6px;color:var(--text);font-size:13px}
 .sidebar ul{list-style:none;padding:0;margin:0}
-.sidebar li{margin:10px 0}
-.sidebar a{text-decoration:none;color:#0b1220}
-.content{background:#fff;padding:20px;border-radius:8px;border:1px solid #eaeef5}
+.sidebar li{margin:8px 0}
+.sidebar a{text-decoration:none;color:var(--text);display:block;padding:6px;border-radius:6px}
+.sidebar a:hover{background:rgba(255,255,255,0.02)}
+.sidebar .sub{padding-left:10px;font-size:14px;color:var(--muted)}
+.content{background:var(--panel);padding:20px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
 .content h2{margin-top:0}
-.pre{background:#0b1220;color:#e6eef6;padding:12px;border-radius:6px}
+.content p,.content li{color:var(--text)}
+.muted{color:var(--muted)}
+.pre{background:#071722;color:var(--text);padding:12px;border-radius:6px}
 .quick ul{padding-left:18px}
-.foot{padding:18px 0;color:#6b7280;text-align:center}
+.foot{padding:18px 0;color:var(--muted);text-align:center}
 @media (max-width:800px){.layout{grid-template-columns:1fr}.sidebar{order:2}.content{order:1}}
+
+/* ensure main content is not hidden behind sticky nav on small viewports */
+body{padding-top:8px}

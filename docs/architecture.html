@@ -4,39 +4,86 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Architecture — PyBullet Swarm Sim</title>
-  <link rel="stylesheet" href="/docs/style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="topbar">
     <div class="container">
-      <h1>Architecture</h1>
+      <div style="display:flex;align-items:center;">
+        <img src="images/logo_sim.png" alt="logo" class="logo" />
+        <div style="display:flex;flex-direction:column;">
+          <h1>PyBullet Swarm Sim</h1>
+          <p class="tag">Fast, physics-accurate drone swarm simulation</p>
+        </div>
+      </div>
+      <div>
+        <a class="github-star" href="https://github.com/SimarcLabs/pybullet-swarm-sim" target="_blank" rel="noopener noreferrer" aria-label="Star on GitHub">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.01.08-2.11 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.91.08 2.11.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.19 0 .21.15.46.55.38C13.71 14.53 16 11.54 16 8c0-4.42-3.58-8-8-8z"></path></svg>
+          <span>Star</span>
+        </a>
+      </div>
     </div>
   </header>
   <div class="container layout">
     <nav class="sidebar">
-      <img src="/pybanner.png" alt="banner" class="banner"/>
+      <h4>Navigation</h4>
       <ul>
-        <li><a href="/docs/index.html">Home</a></li>
-        <li><a href="/docs/getting-started.html">Getting Started</a></li>
-        <li><a href="/docs/architecture.html">Architecture</a></li>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="getting-started.html">Getting Started</a></li>
+        <li><a href="architecture.html">Architecture</a></li>
+      </ul>
+
+      <h4 style="margin-top:12px">Features</h4>
+      <ul class="sub">
+        <li><a href="#algorithms">Swarm Algorithms</a></li>
+        <li><a href="#battle-mode">Battle Mode</a></li>
+        <li><a href="#rl">Reinforcement Learning</a></li>
+        <li><a href="#dashboard">Dashboard & Telemetry</a></li>
+        <li><a href="#evaluation">Evaluation & Benchmarks</a></li>
+        <li><a href="#examples">Examples</a></li>
       </ul>
     </nav>
     <main class="content">
       <h2>Project Layout</h2>
       <pre><code>swarm_sim/
-├─ envs/      # gymnasium environments
-├─ agents/    # controllers and agent wrappers
-├─ algorithms/# built-in swarm behaviors
-├─ battle/    # competitive battle mode (runner, scoring)
-├─ dashboard/ # FastAPI dashboard and runner
-├─ telemetry/ # logging and NPZ export
-</code></pre>
+    ├─ envs/      # gymnasium environments
+    ├─ agents/    # controllers and agent wrappers
+    ├─ algorithms/# built-in swarm behaviors
+    ├─ battle/    # competitive battle mode (runner, scoring)
+    ├─ dashboard/ # FastAPI dashboard and runner
+    ├─ telemetry/ # logging and NPZ export
+    </code></pre>
 
-      <p>Replace or extend this page with more detailed diagrams, code pointers, and example call flows (e.g., agent → env.step → telemetry → dashboard).</p>
+      <p>Below are content placeholders you can expand. Click the items in the left panel to jump to each section.</p>
+
+      <h3 id="algorithms">Swarm Algorithms</h3>
+      <p class="muted">Overview of built-in behaviors and how to use them as baselines.</p>
+      <ul>
+        <li>Flocking (Reynolds Boids)</li>
+        <li>Formation planners</li>
+        <li>Consensus / Coverage</li>
+        <li>PSO, ACO, ABC</li>
+        <li>Artificial Potential Fields (APF)</li>
+      </ul>
+
+      <h3 id="battle-mode">Battle Mode</h3>
+      <p class="muted">Competitive multi-team simulation with kinetic elimination and live scoring. Useful for adversarial MARL and safety testing.</p>
+
+      <h3 id="rl">Reinforcement Learning</h3>
+      <p class="muted">Gymnasium-compatible environments for single and multi-agent RL. Includes `RLSwarm-v0` and `MARLSwarm-v0` with example training scripts.</p>
+
+      <h3 id="dashboard">Dashboard & Telemetry</h3>
+      <p class="muted">FastAPI + Plotly dashboard for live visualization, SSE streaming, and run comparison. Telemetry exports to NPZ for offline analysis.</p>
+
+      <h3 id="evaluation">Evaluation & Benchmarks</h3>
+      <p class="muted">Built-in benchmark suite, emergence metrics, and JSON reports for automated comparisons.</p>
+
+      <h3 id="examples">Examples</h3>
+      <p class="muted">Placeholders for demo scripts: hover, formation, battle, and training examples.</p>
     </main>
   </div>
   <footer class="foot">
-    <div class="container">Architecture overview — add more details here.</div>
+    <div class="container">Open-source (MIT)</div>
   </footer>
 </body>
 </html>

@@ -4,29 +4,51 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>PyBullet Swarm Sim — Docs</title>
-  <link rel="stylesheet" href="/docs/style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="topbar">
     <div class="container">
-      <h1>PyBullet Swarm Sim</h1>
-      <p class="tag">Fast, physics-accurate drone swarm simulation</p>
+      <div style="display:flex;align-items:center;">
+        <img src="images/logo_sim.png" alt="logo" class="logo" />
+        <div style="display:flex;flex-direction:column;">
+          <h1>PyBullet Swarm Sim</h1>
+          <p class="tag">Fast, physics-accurate drone swarm simulation</p>
+        </div>
+      </div>
+      <div>
+        <a class="github-star" href="https://github.com/SimarcLabs/pybullet-swarm-sim" target="_blank" rel="noopener noreferrer" aria-label="Star on GitHub">
+          <!-- GitHub mark (octicon) -->
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.01.08-2.11 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.91.08 2.11.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.19 0 .21.15.46.55.38C13.71 14.53 16 11.54 16 8c0-4.42-3.58-8-8-8z"></path></svg>
+          <span>Star</span>
+        </a>
+      </div>
     </div>
   </header>
   <div class="container layout">
     <nav class="sidebar">
-      <img src="/pybanner.png" alt="banner" class="banner"/>
+      <h4>Navigation</h4>
       <ul>
-        <li><a href="/docs/index.html">Home</a></li>
-        <li><a href="/docs/getting-started.html">Getting Started</a></li>
-        <li><a href="/docs/architecture.html">Architecture</a></li>
-        <li><a href="/docs/README.md">Docs README</a></li>
-        <li><a href="https://github.com/SimarcLabs/pybullet-swarm-sim">GitHub Repo</a></li>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="getting-started.html">Getting Started</a></li>
+        <li><a href="architecture.html">Architecture</a></li>
       </ul>
+
+      <h4 style="margin-top:12px">Features</h4>
+      <ul class="sub">
+        <li><a href="architecture.html#algorithms">Swarm Algorithms</a></li>
+        <li><a href="architecture.html#battle-mode">Battle Mode</a></li>
+        <li><a href="architecture.html#rl">Reinforcement Learning</a></li>
+        <li><a href="architecture.html#dashboard">Dashboard & Telemetry</a></li>
+        <li><a href="architecture.html#evaluation">Evaluation & Benchmarks</a></li>
+        <li><a href="architecture.html#examples">Examples</a></li>
+      </ul>
+
     </nav>
     <main class="content">
+      <img src="images/pybanner.png" alt="Docs banner" class="page-banner" />
       <h2>Welcome</h2>
-      <p>This is a lightweight documentation site for <strong>PyBullet Swarm Sim</strong>. You can edit these pages in the <code>docs/</code> folder — each page is a simple HTML file so you can add content piece-by-piece.</p>
+      <p><strong>PyBullet Swarm Sim</strong> is an open-source Python framework for physics-accurate multi-drone simulation — featuring built-in swarm algorithms, RL-ready environments, and a live web dashboard for visualization and benchmarking.</p>
 
       <section class="quick">
         <h3>Quick Links</h3>
@@ -38,13 +60,27 @@
       </section>
 
       <section class="next">
-        <h3>Next Steps</h3>
-        <p>Edit <code>docs/getting-started.html</code> and replace the placeholders with your instructions and images. When ready, push to GitHub and enable Pages from the repository settings (serve from the <code>docs/</code> folder).</p>
+        <h3>Quick Start</h3>
+        <p>This guide helps you run the first demo and view results.</p>
+        <ul>
+          <li><strong>Install:</strong>
+            <pre><code>pip install -r requirements.txt</code></pre>
+          </li>
+          <li><strong>Run a demo:</strong>
+            <pre><code>python -m swarm_sim.examples.run_hover</code></pre>
+          </li>
+          <li><strong>Open the dashboard:</strong>
+            <pre><code>python -m swarm_sim.dashboard.__main__
+# then open http://localhost:8000</code></pre>
+          </li>
+        </ul>
+
+        <p>See <a href="getting-started.html">Getting Started</a> for troubleshooting and detailed setup. For code layout and features, visit <a href="architecture.html">Architecture</a>. To contribute, open an issue or pull request on the project repository.</p>
       </section>
     </main>
   </div>
   <footer class="foot">
-    <div class="container">Hosted with GitHub Pages • Open-source (MIT)</div>
+    <div class="container">Open-source (MIT)</div>
   </footer>
 </body>
 </html>
