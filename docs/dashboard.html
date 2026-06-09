@@ -43,8 +43,47 @@
       </ul>
     </nav>
     <main class="content">
-      <h2>Dashboard & Telemetry</h2>
-      <p>A FastAPI + Plotly interactive dashboard handling the complete workflow: <em>Configure → Run → Observe → Analyze → Benchmark → Export</em>. It features real-time 3D trajectory plots, SSE log streaming, run history, and an <strong>Algorithm Comparison Mode</strong> to compare runs via interactive radar charts. Telemetry is saved as structured JSON and NPZ archives.</p>
+      <h2>Web Dashboard & Telemetry</h2>
+      <p>PyBullet Swarm Sim ships with a powerful <strong>FastAPI + Plotly</strong> interactive dashboard that handles the complete simulation workflow: <em>Configure → Run → Observe → Analyze → Benchmark → Export</em>. It allows researchers to bypass the command line and conduct complex, multi-agent experiments entirely in the browser.</p>
+
+      <figure style="margin: 2rem 0; text-align: left;">
+        <img src="images/dashboard.png" alt="Web Dashboard Interface" style="max-width: 700px; width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);" />
+      </figure>
+
+      <h3 style="margin-top: 2.5rem;">The Analytics Workflow</h3>
+      <p>The dashboard is designed to guide you through the complete lifecycle of a swarm intelligence experiment.</p>
+
+      <div style="margin-top: 2rem;">
+        <h4>1. Live 3D & 2D Observation</h4>
+        <figure style="margin: 1rem 0; text-align: left;">
+          <img src="images/demo-3.png" alt="Live 3D & 2D Observation" style="max-width: 700px; width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);" />
+        </figure>
+        <p>As the simulation runs, the backend streams telemetry back to the browser via <strong>Server-Sent Events (SSE)</strong>. You can watch the swarm execute its behavior in real-time through interactive 3D and 2D scatter plots, tracking the absolute position and flight paths of every single drone.</p>
+      </div>
+
+      <div style="margin-top: 2rem;">
+        <h4>2. Metric Analysis</h4>
+        <figure style="margin: 1rem 0; text-align: left;">
+          <img src="images/demo-4.png" alt="Metric Analysis" style="max-width: 700px; width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);" />
+        </figure>
+        <p>Once a run finishes, dive into the historical telemetry. The dashboard automatically calculates and visualizes convergence graphs, kinetic energy distributions, and plots distance-to-target metrics over time, allowing you to debug and deeply analyze your control logic.</p>
+      </div>
+
+      <div style="margin-top: 2rem;">
+        <h4>3. Benchmark Report</h4>
+        <figure style="margin: 1rem 0; text-align: left;">
+          <img src="images/demo-5.png" alt="Benchmark Report" style="max-width: 700px; width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);" />
+        </figure>
+        <p>The Benchmark feature is essential for systematic evaluation. You can generate comprehensive reports to evaluate algorithm performance side-by-side using interactive radar charts across core emergence metrics: <em>Coverage</em>, <em>Cohesion</em>, <em>Connectivity</em>, and <em>Safety</em>.</p>
+      </div>
+
+      <div style="margin-top: 2rem;">
+        <h4>4. Export Results</h4>
+        <figure style="margin: 1rem 0; text-align: left;">
+          <img src="images/demo-6.png" alt="Export Results" style="max-width: 700px; width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);" />
+        </figure>
+        <p>Finally, researchers can easily download and export telemetry data, complete simulation states, and calculated metrics directly to <code>.npz</code> or <code>.json</code> formats. This allows for seamless integration into offline academic tools and publication pipelines.</p>
+      </div>
     </main>
   </div>
   <footer class="foot">

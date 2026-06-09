@@ -43,13 +43,40 @@
       </ul>
     </nav>
     <main class="content">
-      <h2>Reinforcement Learning</h2>
-      <p>Provides native Gymnasium-compatible environments for RL:</p>
+      <h2>Multi-Agent Reinforcement Learning (MARL)</h2>
+      <p>PyBullet Swarm Sim provides first-class support for Reinforcement Learning (RL). By deeply integrating with <strong>Gymnasium</strong> and <strong>Stable-Baselines3</strong>, the platform bridges the gap between rigid-body physics simulation and state-of-the-art policy optimization.</p>
+
+      <figure style="margin: 2rem 0; text-align: left;">
+        <img src="images/marl.png" alt="MARL Training Dashboard" style="max-width: 700px; width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);" />
+      </figure>
+
+      <h3>Use Cases & Requirements</h3>
+      <p>While classical algorithms (like Flocking or PSO) rely on explicit mathematical rules, MARL allows drones to <em>learn</em> optimal behaviors through trial and error. This is critical for discovering complex strategies such as cooperative collision avoidance, adversarial evasion (for Battle Mode), and decentralized target tracking in cluttered environments.</p>
+      
+      <p><strong>Requirements:</strong> To enable RL features, install the optional dependencies:</p>
+      <pre><code>pip install -e ".[rl]"</code></pre>
+
+      <h3 style="margin-top: 2rem;">Technical Implementation</h3>
+      <p>The core of our RL integration is the custom Gymnasium environment: <code>MARLSwarm-v0</code>. Instead of training $N$ distinct neural networks, we utilize <strong>parameter sharing</strong>. A single Proximal Policy Optimization (PPO) policy is trained, but each drone queries it using decentralized, ego-centric observations.</p>
       <ul>
-        <li><code>RLSwarm-v0</code>: Single-agent RL with normalized observations and actions.</li>
-        <li><code>MARLSwarm-v0</code>: Multi-agent RL using parameter-sharing and ego-centric observations.</li>
+        <li><strong>Observation Space:</strong> Ego-centric relative positions of the nearest neighbors, relative vector to the global target, and current velocity.</li>
+        <li><strong>Action Space:</strong> Continuous 3D target velocity vectors mapped directly to the low-level PID attitude controllers.</li>
+        <li><strong>Reward Function:</strong> Dense rewards for moving closer to the target, coupled with severe sparse penalties for peer-to-peer collisions.</li>
       </ul>
-      <p>Includes pre-configured training scripts (e.g., <code>marl_train.py</code>) ready for use with Stable-Baselines3.</p>
+
+      <h3 style="margin-top: 2rem;">Command-Line Training</h3>
+      <p>You can train policies headlessly using the built-in training runner. This script orchestrates the PPO algorithm, sets up the vectorized environments, and logs progress.</p>
+      <pre><code>python -m swarm_sim.training.marl_train --timesteps 100000 --drones 5 --run-name initial-marl</code></pre>
+      <p>Once training completes, the policy is serialized and saved as a <code>.zip</code> checkpoint inside the <code>models/</code> directory.</p>
+
+      <h3 style="margin-top: 2rem;">Dashboard Integration</h3>
+      <p>As shown in the image above, the Web Dashboard features a dedicated <strong>RL Training Panel</strong>. This provides a user-friendly way to democratize AI research:</p>
+      <ol>
+        <li>Specify the number of training timesteps.</li>
+        <li>Launch the training asynchronously directly from the UI.</li>
+        <li>Monitor the PPO learning metrics via live Server-Sent Events (SSE) streaming logs.</li>
+        <li>Once finished, the new model instantly appears in the algorithm dropdown, ready to be deployed as a standard algorithm against classical baselines in Battle Mode.</li>
+      </ol>
     </main>
   </div>
   <footer class="foot">

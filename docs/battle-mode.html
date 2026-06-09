@@ -44,7 +44,44 @@
     </nav>
     <main class="content">
       <h2>Battle Mode</h2>
-      <p>A competitive multi-team simulation with kinetic elimination. Two distinct algorithms (e.g., Flocking vs PSO) are pitched against each other in a combat arena. Faster, aggressive drones eliminate slower ones upon collision. Includes a live scoreboard, kill feed, and post-battle combat analytics.</p>
+      <p>Battle Mode is a competitive, multi-team simulation environment featuring kinetic elimination. Two distinct swarm algorithms (e.g., Flocking vs. PSO) are pitched against each other in a combat arena. Drones engage in physics-based combat where faster, aggressive drones eliminate slower ones upon high-velocity collision.</p>
+
+      <figure style="margin: 2rem 0; text-align: center;">
+        <img src="images/battlemode.png" alt="Battle Mode Overview" style="max-width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);" />
+      </figure>
+
+      <h3>How to Run Battle Mode</h3>
+      <p>You can launch a headless combat simulation directly from the command line by specifying the algorithms and team sizes:</p>
+      <pre><code>python -m swarm_sim.battle.runner --algo-alpha flocking --algo-bravo pso --drones-alpha 10 --drones-bravo 10 --duration 20</code></pre>
+      <p>Alternatively, for the best visual experience, use the interactive <strong>Web Dashboard</strong> to configure, monitor, and analyze battles seamlessly.</p>
+
+      <h3 style="margin-top: 2.5rem;">Battle Workflow</h3>
+      <p>The dashboard provides a complete, end-to-end combat visualization and analytics pipeline.</p>
+
+      <div style="margin-top: 2rem;">
+        <h4>1. Team Configuration</h4>
+        <figure style="margin: 1rem 0; text-align: left;">
+          <img src="images/team_config.png" alt="Team Configuration" style="max-width: 700px; width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);" />
+        </figure>
+        <p>Select the underlying behavioral algorithms for <strong>Team Alpha (Red)</strong> and <strong>Team Bravo (Blue)</strong>. You can precisely balance the combat scenario by adjusting the drone count per team, the maximum simulation duration, and the unique job identifier for tracking.</p>
+      </div>
+
+      <div style="margin-top: 2rem;">
+        <h4>2. Live Swarm Battle</h4>
+        <figure style="margin: 1rem 0; text-align: left;">
+          <img src="images/swarm_battle.png" alt="Live Swarm Battle" style="max-width: 700px; width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);" />
+        </figure>
+        <p>Watch the battle unfold dynamically. The physics engine tracks real-time velocities and collisions. When drones collide, the one carrying lower kinetic energy is instantly eliminated and disabled. A live scoreboard and real-time kill-feed stream track every interaction.</p>
+      </div>
+
+      <div style="margin-top: 2rem;">
+        <h4>3. Battle Results & Analytics</h4>
+        <figure style="margin: 1rem 0; text-align: left;">
+          <img src="images/battle_results.png" alt="Battle Results" style="max-width: 700px; width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);" />
+        </figure>
+        <p>Once the dust settles, the dashboard presents comprehensive post-battle combat analytics. You can evaluate the final survival counts, K/D (Kill/Death) ratios, and structural team health to conclusively determine which swarm intelligence strategy thrives in adversarial environments.</p>
+      </div>
+
     </main>
   </div>
   <footer class="foot">

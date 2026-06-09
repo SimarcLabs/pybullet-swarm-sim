@@ -43,20 +43,54 @@
       </ul>
     </nav>
     <main class="content">
-      <h2>Swarm Algorithms (10 Built-in)</h2>
-      <p>All algorithms implement the <code>BaseAlgorithm</code> interface, generating velocity vectors from the collective <code>SwarmState</code>.</p>
+      <figure style="margin: 0 0 2rem 0; text-align: center;">
+        <img src="images/algorithms.png" alt="Swarm Algorithms in Action" style="max-width: 600px; width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);" />
+      </figure>
+
+      <h2>10 Built-in Swarm Algorithms</h2>
+      <p>PyBullet Swarm Sim includes a diverse library of foundational and advanced swarm intelligence algorithms. All algorithms implement the <code>BaseAlgorithm</code> interface and generate continuous velocity vectors based on the collective <code>SwarmState</code>.</p>
       <ul>
-        <li><strong>Reynolds Boids:</strong> Classic separation, alignment, and cohesion.</li>
-        <li><strong>Formation Flight:</strong> Geometric shapes (Line, V, Grid, Ring, Helix).</li>
-        <li><strong>Hover Swarm:</strong> Fixed-point station keeping baseline.</li>
-        <li><strong>PSO Search:</strong> Particle Swarm Optimization with global best tracking.</li>
-        <li><strong>ACO Path Planning:</strong> Ant Colony pheromone trail waypoints.</li>
-        <li><strong>Consensus:</strong> Distributed rendezvous and coverage.</li>
-        <li><strong>Artificial Potential Fields:</strong> Goal attraction plus obstacle/peer repulsion.</li>
-        <li><strong>Artificial Bee Colony:</strong> Foraging dynamics with Employed, Onlooker, and Scout roles.</li>
-        <li><strong>Voronoi Coverage:</strong> Lloyd's algorithm for optimal spatial dispersion.</li>
-        <li><strong>MARL (PPO):</strong> Multi-agent reinforcement learning using a shared PPO policy.</li>
+        <li><strong>Reynolds Boids:</strong> The classic flocking model relying on Separation, Alignment, and Cohesion to simulate bird-like flight.</li>
+        <li><strong>Formation Flight:</strong> A structural planner that maintains precise geometric shapes like Lines, V-shapes, Grids, Rings, and Helices.</li>
+        <li><strong>Hover Swarm:</strong> A baseline fixed-point station-keeping algorithm to evaluate core physics and PID stability.</li>
+        <li><strong>PSO (Particle Swarm Optimization):</strong> A search algorithm where drones act as particles converging on a globally optimal target.</li>
+        <li><strong>ACO (Ant Colony Optimization):</strong> A path-planning strategy where agents lay digital pheromones to discover and reinforce optimal routes.</li>
+        <li><strong>Consensus:</strong> A distributed algorithm driving the swarm to rendezvous at a shared central point or reach state agreement.</li>
+        <li><strong>APF (Artificial Potential Fields):</strong> Uses attractive forces toward a goal and repulsive forces from obstacles and peers for dynamic navigation.</li>
+        <li><strong>ABC (Artificial Bee Colony):</strong> A foraging dynamics model splitting the swarm into Employed, Onlooker, and Scout roles for exploration.</li>
+        <li><strong>Voronoi Coverage:</strong> Utilizes Lloyd's algorithm to compute spatial Voronoi tessellations, optimally dispersing drones to maximize area coverage.</li>
+        <li><strong>MARL (PPO):</strong> A Multi-Agent Reinforcement Learning policy trained using parameter-sharing to achieve cooperative, collision-free goal seeking.</li>
       </ul>
+
+      <h2 style="margin-top: 2rem;">Custom Algorithm Upload (.py)</h2>
+      <p>The dashboard provides a powerful feature to test your own experimental algorithms instantly without touching the core codebase or restarting the server. You can upload a custom Python (<code>.py</code>) file directly through the UI.</p>
+      
+      <h3>How it works</h3>
+      <ol>
+        <li>Create a Python file containing a class that inherits from <code>BaseAlgorithm</code>.</li>
+        <li>Implement the <code>compute(self, state)</code> method.</li>
+        <li>Upload the file in the "Upload Algorithm (.py)" section on the dashboard and click Run.</li>
+      </ol>
+
+      <p>Your method will receive a <code>SwarmState</code> object every timestep containing the absolute positions and velocities of all drones, and it must return an <code>(N, 3)</code> NumPy array representing the target velocity vectors.</p>
+
+      <pre><code>from swarm_sim.algorithms.base_algorithm import BaseAlgorithm
+import numpy as np
+
+class MyCustomSwarm(BaseAlgorithm):
+    def __init__(self, num_drones, **kwargs):
+        super().__init__(num_drones)
+        self.speed = 1.0
+        
+    def compute(self, state):
+        # state.positions: (N, 3) array of drone absolute (x,y,z) coordinates
+        # state.velocities: (N, 3) array of drone velocities
+        
+        target_velocities = np.zeros((self.n, 3))
+        # Example logic: Command all drones to move straight up
+        target_velocities[:, 2] = self.speed 
+        
+        return target_velocities</code></pre>
     </main>
   </div>
   <footer class="foot">
