@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Architecture — PyBullet Swarm Sim</title>
+  <title>Reinforcement Learning — PyBullet Swarm Sim</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -43,29 +43,13 @@
       </ul>
     </nav>
     <main class="content">
-      <figure style="margin: 0 0 2rem 0; text-align: center;">
-        <img src="images/architecture.png" alt="PyBullet Swarm Sim High-Level Architecture" style="max-width: 600px; width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);" />
-        <figcaption class="muted" style="margin-top: 8px; font-size: 0.9em;"><strong>Figure 1:</strong> High-level system architecture of PyBullet Swarm Sim.</figcaption>
-      </figure>
-
-      <h2>Project Layout</h2>
-      <pre><code>pybullet-swarm-sim/
-├── swarm_sim/
-│   ├── envs/        # Gymnasium environments (Base, Hover, Formation, RL, MARL)
-│   ├── agents/      # Controllers (PID, RL wrapper)
-│   ├── algorithms/  # 10 built-in swarm behaviors
-│   ├── training/    # RL training scripts
-│   ├── dashboard/   # FastAPI web interface and runner
-│   ├── telemetry/   # Per-step state logging and NPZ export
-│   ├── evaluation/  # Benchmark evaluation and reports
-│   ├── events/      # Simulation event logging
-│   ├── testing/     # Benchmark harnesses
-│   ├── core/        # Shared state primitives (SwarmState)
-│   ├── utils/       # Enumerations and plotting
-│   └── assets/      # URDF drone models (CF2X, CF2P)
-├── models/          # Trained RL model checkpoints (.zip)
-├── tests/           # Pytest suite
-└── docs/            # Static documentation</code></pre>
+      <h2>Reinforcement Learning</h2>
+      <p>Provides native Gymnasium-compatible environments for RL:</p>
+      <ul>
+        <li><code>RLSwarm-v0</code>: Single-agent RL with normalized observations and actions.</li>
+        <li><code>MARLSwarm-v0</code>: Multi-agent RL using parameter-sharing and ego-centric observations.</li>
+      </ul>
+      <p>Includes pre-configured training scripts (e.g., <code>marl_train.py</code>) ready for use with Stable-Baselines3.</p>
     </main>
   </div>
   <footer class="foot">

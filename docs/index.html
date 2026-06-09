@@ -36,46 +36,46 @@
 
       <h4 style="margin-top:12px">Features</h4>
       <ul class="sub">
-        <li><a href="architecture.html#algorithms">Swarm Algorithms</a></li>
-        <li><a href="architecture.html#battle-mode">Battle Mode</a></li>
-        <li><a href="architecture.html#rl">Reinforcement Learning</a></li>
-        <li><a href="architecture.html#dashboard">Dashboard & Telemetry</a></li>
-        <li><a href="architecture.html#evaluation">Evaluation & Benchmarks</a></li>
-        <li><a href="architecture.html#examples">Examples</a></li>
+        <li><a href="algorithms.html">Swarm Algorithms</a></li>
+        <li><a href="battle-mode.html">Battle Mode</a></li>
+        <li><a href="rl.html">Reinforcement Learning</a></li>
+        <li><a href="dashboard.html">Dashboard & Telemetry</a></li>
+        <li><a href="evaluation.html">Evaluation & Benchmarks</a></li>
       </ul>
 
     </nav>
     <main class="content">
       <img src="images/pybanner.png" alt="Docs banner" class="page-banner" />
       <h2>Welcome</h2>
-      <p><strong>PyBullet Swarm Sim</strong> is an open-source Python framework for physics-accurate multi-drone simulation — featuring built-in swarm algorithms, RL-ready environments, and a live web dashboard for visualization and benchmarking.</p>
+      <p><strong>PyBullet Swarm Sim</strong> is an open-source Python framework for physics-accurate multi-drone simulation — featuring 10 built-in swarm algorithms, RL-ready environments, Battle Mode, and a live web dashboard for visualization and benchmarking.</p>
 
       <section class="quick">
         <h3>Quick Links</h3>
         <ul>
-          <li><strong>Getting Started:</strong> install, run an example, and view the dashboard.</li>
-          <li><strong>Architecture:</strong> project layout and key modules (envs, agents, algorithms, battle).</li>
-          <li><strong>Examples:</strong> scripts for running demos and training.</li>
+          <li><strong>Getting Started:</strong> install, run your first swarm, and launch the web dashboard.</li>
+          <li><strong>Architecture:</strong> explore the project layout and core modules (envs, agents, algorithms, battle mode).</li>
         </ul>
       </section>
 
       <section class="next">
         <h3>Quick Start</h3>
-        <p>This guide helps you run the first demo and view results.</p>
+        <p>This brief guide helps you get the simulation running instantly.</p>
         <ul>
-          <li><strong>Install:</strong>
-            <pre><code>pip install -r requirements.txt</code></pre>
+          <li><strong>Install from source:</strong>
+            <pre><code>git clone https://github.com/SimarcLabs/pybullet-swarm-sim.git
+cd pybullet-swarm-sim
+pip install -e .</code></pre>
           </li>
-          <li><strong>Run a demo:</strong>
-            <pre><code>python -m swarm_sim.examples.run_hover</code></pre>
+          <li><strong>Run a headless demo (e.g., Boids Flocking):</strong>
+            <pre><code>python -m swarm_sim.examples.flocking --n-drones 12</code></pre>
           </li>
-          <li><strong>Open the dashboard:</strong>
-            <pre><code>python -m swarm_sim.dashboard.__main__
-# then open http://localhost:8000</code></pre>
+          <li><strong>Launch the Web Dashboard:</strong>
+            <pre><code>python -m swarm_sim.dashboard</code></pre>
+            <em>The dashboard will open automatically at http://127.0.0.1:8000, allowing you to run, compare, and benchmark algorithms visually.</em>
           </li>
         </ul>
 
-        <p>See <a href="getting-started.html">Getting Started</a> for troubleshooting and detailed setup. For code layout and features, visit <a href="architecture.html">Architecture</a>. To contribute, open an issue or pull request on the project repository.</p>
+        <p>See <a href="getting-started.html">Getting Started</a> for detailed setup and optional dependencies (RL, Dashboard). For code layout and features like MARL or Battle Mode, visit <a href="architecture.html">Architecture</a>. To contribute, open an issue or pull request on the GitHub repository.</p>
       </section>
     </main>
   </div>

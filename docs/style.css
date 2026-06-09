@@ -8,7 +8,7 @@
 
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
-.container{max-width:1000px;margin:0 auto;padding:16px}
+.container{max-width:1200px;margin:0 auto;padding:16px}
 .topbar{position:sticky;top:0;z-index:1200;background:linear-gradient(180deg, rgba(7,16,34,0.98), rgba(7,16,34,0.95));backdrop-filter:blur(6px);padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
 .topbar .container{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .topbar h1{margin:0;font-size:18px;color:var(--text);line-height:1}
@@ -32,7 +32,8 @@ body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,Helvetica,sans-s
 .content h2{margin-top:0}
 .content p,.content li{color:var(--text)}
 .muted{color:var(--muted)}
-.pre{background:#071722;color:var(--text);padding:12px;border-radius:6px}
+pre { background: #071722; color: var(--text); padding: 12px; border-radius: 6px; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 0.9em; }
 .quick ul{padding-left:18px}
 .foot{padding:18px 0;color:var(--muted);text-align:center}
 @media (max-width:800px){.layout{grid-template-columns:1fr}.sidebar{order:2}.content{order:1}}

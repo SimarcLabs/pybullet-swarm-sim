@@ -35,30 +35,43 @@
 
       <h4 style="margin-top:12px">Features</h4>
       <ul class="sub">
-        <li><a href="architecture.html#algorithms">Swarm Algorithms</a></li>
-        <li><a href="architecture.html#battle-mode">Battle Mode</a></li>
-        <li><a href="architecture.html#rl">Reinforcement Learning</a></li>
-        <li><a href="architecture.html#dashboard">Dashboard & Telemetry</a></li>
+        <li><a href="algorithms.html">Swarm Algorithms</a></li>
+        <li><a href="battle-mode.html">Battle Mode</a></li>
+        <li><a href="rl.html">Reinforcement Learning</a></li>
+        <li><a href="dashboard.html">Dashboard & Telemetry</a></li>
+        <li><a href="evaluation.html">Evaluation & Benchmarks</a></li>
       </ul>
     </nav>
     <main class="content">
-      <h2>Install</h2>
-      <pre><code>pip install -r requirements.txt
-# or
-pip install -e .
-</code></pre>
+      <h2>Installation</h2>
+      <p>Clone the repository and install the framework. PyBullet Swarm Sim is designed to be minimal in setup.</p>
+      <pre><code>git clone https://github.com/SimarcLabs/pybullet-swarm-sim.git
+cd pybullet-swarm-sim
+pip install -e .</code></pre>
 
-      <h2>Run an example</h2>
-      <pre><code>python -m swarm_sim.examples.run_hover
-# or a short demo script you add here
-</code></pre>
+      <p><strong>Optional Extras:</strong></p>
+      <pre><code># Web dashboard (FastAPI + Plotly)
+pip install -e ".[dashboard]"
 
-      <h2>Preview dashboard</h2>
-      <p>Start the server and open <code>http://localhost:8000</code> (default):</p>
-      <pre><code>python -m swarm_sim.dashboard.__main__
-</code></pre>
+# RL training support (Stable-Baselines3)
+pip install -e ".[rl]"</code></pre>
 
-      <p>Replace the placeholders above with exact commands for your repo examples and any extra steps (URDF assets, GPU drivers, etc.).</p>
+      <h2>Running Examples (CLI)</h2>
+      <p>All examples run headlessly via the PyBullet GUI. No config files are required.</p>
+      
+      <p><strong>Formation Flight (8 drones, V-shape):</strong></p>
+      <pre><code>python -m swarm_sim.examples.formation_flight --n-drones 8 --formation v</code></pre>
+      
+      <p><strong>Boids Flocking (12 drones):</strong></p>
+      <pre><code>python -m swarm_sim.examples.flocking --n-drones 12</code></pre>
+
+      <p><strong>Battle Mode (Flocking vs PSO):</strong></p>
+      <pre><code>python -m swarm_sim.battle.runner --algo-alpha flocking --algo-bravo pso --drones-alpha 10 --drones-bravo 10 --duration 20 --job-id battle-demo</code></pre>
+
+      <h2>Launching the Web Dashboard</h2>
+      <p>The dashboard provides a browser-based interface for configuring simulations, viewing interactive 3D trajectories, comparing algorithms, and training MARL agents.</p>
+      <pre><code>python -m swarm_sim.dashboard</code></pre>
+      <p>The server will start on <code>http://127.0.0.1:8000</code> and open automatically in your browser.</p>
     </main>
   </div>
   <footer class="foot">

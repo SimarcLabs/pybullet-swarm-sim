@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Architecture — PyBullet Swarm Sim</title>
+  <title>Swarm Algorithms — PyBullet Swarm Sim</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -43,29 +43,20 @@
       </ul>
     </nav>
     <main class="content">
-      <figure style="margin: 0 0 2rem 0; text-align: center;">
-        <img src="images/architecture.png" alt="PyBullet Swarm Sim High-Level Architecture" style="max-width: 600px; width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);" />
-        <figcaption class="muted" style="margin-top: 8px; font-size: 0.9em;"><strong>Figure 1:</strong> High-level system architecture of PyBullet Swarm Sim.</figcaption>
-      </figure>
-
-      <h2>Project Layout</h2>
-      <pre><code>pybullet-swarm-sim/
-├── swarm_sim/
-│   ├── envs/        # Gymnasium environments (Base, Hover, Formation, RL, MARL)
-│   ├── agents/      # Controllers (PID, RL wrapper)
-│   ├── algorithms/  # 10 built-in swarm behaviors
-│   ├── training/    # RL training scripts
-│   ├── dashboard/   # FastAPI web interface and runner
-│   ├── telemetry/   # Per-step state logging and NPZ export
-│   ├── evaluation/  # Benchmark evaluation and reports
-│   ├── events/      # Simulation event logging
-│   ├── testing/     # Benchmark harnesses
-│   ├── core/        # Shared state primitives (SwarmState)
-│   ├── utils/       # Enumerations and plotting
-│   └── assets/      # URDF drone models (CF2X, CF2P)
-├── models/          # Trained RL model checkpoints (.zip)
-├── tests/           # Pytest suite
-└── docs/            # Static documentation</code></pre>
+      <h2>Swarm Algorithms (10 Built-in)</h2>
+      <p>All algorithms implement the <code>BaseAlgorithm</code> interface, generating velocity vectors from the collective <code>SwarmState</code>.</p>
+      <ul>
+        <li><strong>Reynolds Boids:</strong> Classic separation, alignment, and cohesion.</li>
+        <li><strong>Formation Flight:</strong> Geometric shapes (Line, V, Grid, Ring, Helix).</li>
+        <li><strong>Hover Swarm:</strong> Fixed-point station keeping baseline.</li>
+        <li><strong>PSO Search:</strong> Particle Swarm Optimization with global best tracking.</li>
+        <li><strong>ACO Path Planning:</strong> Ant Colony pheromone trail waypoints.</li>
+        <li><strong>Consensus:</strong> Distributed rendezvous and coverage.</li>
+        <li><strong>Artificial Potential Fields:</strong> Goal attraction plus obstacle/peer repulsion.</li>
+        <li><strong>Artificial Bee Colony:</strong> Foraging dynamics with Employed, Onlooker, and Scout roles.</li>
+        <li><strong>Voronoi Coverage:</strong> Lloyd's algorithm for optimal spatial dispersion.</li>
+        <li><strong>MARL (PPO):</strong> Multi-agent reinforcement learning using a shared PPO policy.</li>
+      </ul>
     </main>
   </div>
   <footer class="foot">
