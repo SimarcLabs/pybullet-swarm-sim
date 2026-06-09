@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Architecture — PyBullet Swarm Sim</title>
+  <link rel="stylesheet" href="/docs/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="container">
+      <h1>Architecture</h1>
+    </div>
+  </header>
+  <div class="container layout">
+    <nav class="sidebar">
+      <img src="/pybanner.png" alt="banner" class="banner"/>
+      <ul>
+        <li><a href="/docs/index.html">Home</a></li>
+        <li><a href="/docs/getting-started.html">Getting Started</a></li>
+        <li><a href="/docs/architecture.html">Architecture</a></li>
+      </ul>
+    </nav>
+    <main class="content">
+      <h2>Project Layout</h2>
+      <pre><code>swarm_sim/
+├─ envs/      # gymnasium environments
+├─ agents/    # controllers and agent wrappers
+├─ algorithms/# built-in swarm behaviors
+├─ battle/    # competitive battle mode (runner, scoring)
+├─ dashboard/ # FastAPI dashboard and runner
+├─ telemetry/ # logging and NPZ export
+</code></pre>
+
+      <p>Replace or extend this page with more detailed diagrams, code pointers, and example call flows (e.g., agent → env.step → telemetry → dashboard).</p>
+    </main>
+  </div>
+  <footer class="foot">
+    <div class="container">Architecture overview — add more details here.</div>
+  </footer>
+</body>
+</html>
