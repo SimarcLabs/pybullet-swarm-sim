@@ -13,7 +13,7 @@ Example
 -------
 >>> from swarm_sim.algorithms.flocking import FlockingAlgorithm
 >>> flock = FlockingAlgorithm(num_drones=10)
->>> velocity_targets = flock.compute(positions, velocities)
+>>> velocity_targets = flock.compute(state)
 """
 
 from __future__ import annotations

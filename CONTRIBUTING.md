@@ -44,7 +44,7 @@ ruff check swarm_sim/ tests/
 ## Adding a New Swarm Algorithm
 
 1. Create `swarm_sim/algorithms/your_algorithm.py`
-2. Implement a class with a `compute()` method that takes `(positions, velocities)` and returns `(N, 3)` velocity targets
+2. Subclass `BaseAlgorithm` and implement `compute(state: SwarmState)`, returning `(N, 3)` velocity targets. Read what you need off the state, e.g. `state.positions`, `state.velocities`, `state.neighbor_graph`, `state.targets`, or `state.sensor_readings["..."]`
 3. Add an example in `swarm_sim/examples/`
 4. Add tests in `tests/test_algorithms.py`
 5. Update `swarm_sim/__init__.py` to export the new class

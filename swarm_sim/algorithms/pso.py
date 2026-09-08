@@ -15,7 +15,8 @@ Example
 -------
 >>> from swarm_sim.algorithms.pso import PSOAlgorithm
 >>> pso = PSOAlgorithm(num_drones=10, bounds_lo=[-5,-5,0.5], bounds_hi=[5,5,3])
->>> vel_targets = pso.compute(positions, velocities, fitness_values)
+>>> state.sensor_readings["fitness"] = fitness_values
+>>> vel_targets = pso.compute(state)
 """
 
 from __future__ import annotations
