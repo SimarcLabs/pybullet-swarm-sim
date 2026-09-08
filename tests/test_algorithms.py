@@ -8,7 +8,45 @@ from swarm_sim.algorithms.formation import FormationPlanner
 from swarm_sim.algorithms.consensus import ConsensusAlgorithm
 from swarm_sim.algorithms.pso import PSOAlgorithm
 from swarm_sim.algorithms.aco import ACOPathPlanner
+from swarm_sim.core.state import SwarmState
 from swarm_sim.utils.enums import FormationType
+
+
+def make_state(positions, velocities=None, neighbor_graph=None, **kwargs):
+    """Build a minimal :class:`SwarmState` for algorithm tests.
+
+    Fields the algorithms under test do not read are filled with zeros, and
+    the neighbour graph defaults to fully connected.
+
+    Parameters
+    ----------
+    positions : array_like
+        ``(N, 3)`` drone positions.
+    velocities : array_like, optional
+        ``(N, 3)`` drone velocities.  Defaults to zeros.
+    neighbor_graph : array_like, optional
+        ``(N, N)`` adjacency matrix.  Defaults to all-ones (fully connected).
+    **kwargs
+        Extra ``SwarmState`` fields, e.g. ``targets`` or ``sensor_readings``.
+
+    Returns
+    -------
+    SwarmState
+    """
+    positions = np.asarray(positions, dtype=float)
+    n = positions.shape[0]
+    return SwarmState(
+        positions=positions,
+        velocities=(
+            np.zeros((n, 3)) if velocities is None else np.asarray(velocities, dtype=float)
+        ),
+        orientations=np.zeros((n, 3)),
+        angular_velocities=np.zeros((n, 3)),
+        neighbor_graph=(
+            np.ones((n, n), dtype=bool) if neighbor_graph is None else np.asarray(neighbor_graph)
+        ),
+        **kwargs,
+    )
 
 
 class TestFlocking:
@@ -18,14 +56,14 @@ class TestFlocking:
         flock = FlockingAlgorithm(num_drones=5)
         pos = np.random.randn(5, 3)
         vel = np.random.randn(5, 3)
-        targets = flock.compute(pos, vel)
+        targets = flock.compute(make_state(pos, vel))
         assert targets.shape == (5, 3)
 
     def test_max_speed_clamped(self):
         flock = FlockingAlgorithm(num_drones=3, max_speed=1.0)
         pos = np.array([[0, 0, 0], [10, 10, 10], [-10, -10, -10]], dtype=float)
         vel = np.zeros((3, 3))
-        targets = flock.compute(pos, vel)
+        targets = flock.compute(make_state(pos, vel))
         speeds = np.linalg.norm(targets, axis=1)
         assert np.all(speeds <= 1.0 + 1e-6)
 
@@ -33,7 +71,7 @@ class TestFlocking:
         flock = FlockingAlgorithm(num_drones=1)
         pos = np.array([[0, 0, 1.0]])
         vel = np.array([[0, 0, 0.0]])
-        targets = flock.compute(pos, vel)
+        targets = flock.compute(make_state(pos, vel))
         assert np.allclose(targets, 0), "Single drone should produce zero velocity"
 
 
@@ -69,7 +107,7 @@ class TestConsensus:
         alg = ConsensusAlgorithm(num_drones=3, gain=1.0, mode="rendezvous")
         pos = np.array([[0, 0, 1], [2, 0, 1], [1, 2, 1]], dtype=float)
         adj = np.ones((3, 3))
-        vel = alg.compute(pos, adj)
+        vel = alg.compute(make_state(pos, neighbor_graph=adj))
         # All drones should move toward each other
         for i in range(3):
             assert np.linalg.norm(vel[i]) > 0, f"Drone {i} should have non-zero velocity"
@@ -87,7 +125,7 @@ class TestPSO:
         pos = np.random.randn(5, 3)
         vel = np.random.randn(5, 3)
         fitness = np.random.randn(5)
-        targets = pso.compute(pos, vel, fitness)
+        targets = pso.compute(make_state(pos, vel, sensor_readings={"fitness": fitness}))
         assert targets.shape == (5, 3)
 
     def test_global_best_updated(self):
@@ -95,7 +133,7 @@ class TestPSO:
         pos = np.array([[0, 0, 1], [1, 1, 1], [2, 2, 1]], dtype=float)
         vel = np.zeros((3, 3))
         fitness = np.array([1.0, 5.0, 3.0])
-        pso.compute(pos, vel, fitness)
+        pso.compute(make_state(pos, vel, sensor_readings={"fitness": fitness}))
         assert pso.global_best_fitness == 5.0
         assert np.allclose(pso.global_best_position, [1, 1, 1])
 
@@ -108,14 +146,14 @@ class TestACO:
         pos = np.random.uniform(-2, 2, size=(4, 3))
         pos[:, 2] = 1.0
         goal = np.array([3, 3, 1.0])
-        waypoints = aco.compute(pos, goal)
+        waypoints = aco.compute(make_state(pos, targets=goal.reshape(1, 3)))
         assert waypoints.shape == (4, 3)
 
     def test_pheromone_evaporation(self):
         aco = ACOPathPlanner(grid_size=5, rho=0.5)
         initial = aco.pheromone.copy()
         pos = np.array([[0, 0, 1.0]])
-        aco.compute(pos, goal=np.array([1, 1, 1]))
+        aco.compute(make_state(pos, targets=np.array([[1.0, 1.0, 1.0]])))
         # After one step, most cells should have lower pheromone
         # (evaporation > deposit for most cells)
         assert aco.pheromone.mean() != initial.mean()

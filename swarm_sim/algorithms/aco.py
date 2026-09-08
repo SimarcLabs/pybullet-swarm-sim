@@ -14,7 +14,8 @@ Example
 -------
 >>> from swarm_sim.algorithms.aco import ACOPathPlanner
 >>> aco = ACOPathPlanner(grid_size=20, num_drones=6)
->>> next_waypoints = aco.compute(positions, goal=np.array([5, 5, 1]))
+>>> state.targets = np.array([[5, 5, 1]])  # goal is read from state.targets[0]
+>>> next_waypoints = aco.compute(state)
 """
 
 from __future__ import annotations

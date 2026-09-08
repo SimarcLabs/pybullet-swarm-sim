@@ -21,6 +21,7 @@ import numpy as np
 from swarm_sim.envs.base_swarm_env import BaseSwarmEnv
 from swarm_sim.agents.pid_agent import PIDAgent
 from swarm_sim.algorithms.flocking import FlockingAlgorithm
+from swarm_sim.core.state import SwarmState
 from swarm_sim.utils.logger import SwarmLogger
 from swarm_sim.utils.viz import sync
 
@@ -91,7 +92,15 @@ def run(
         velocities = env.vel.copy()
 
         # Compute boid velocity targets
-        vel_targets = flock.compute(positions, velocities)
+        vel_targets = flock.compute(
+            SwarmState(
+                positions=positions,
+                velocities=velocities,
+                orientations=env.rpy.copy(),
+                angular_velocities=env.ang_v.copy(),
+                neighbor_graph=env.get_adjacency_matrix(),
+            )
+        )
 
         # Convert velocity targets to position waypoints
         dt = 1 / ctrl_freq

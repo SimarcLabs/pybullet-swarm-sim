@@ -14,7 +14,7 @@ Example
 -------
 >>> from swarm_sim.algorithms.consensus import ConsensusAlgorithm
 >>> consensus = ConsensusAlgorithm(num_drones=6, gain=0.5)
->>> vel_targets = consensus.compute(positions, adjacency_matrix)
+>>> vel_targets = consensus.compute(state)  # adjacency from state.neighbor_graph
 """
 
 from __future__ import annotations
